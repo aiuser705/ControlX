@@ -1,0 +1,309 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+import * as THREE from 'three';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SWAPPABLE ASSET — Only this path needs changing when the final video arrives
+// ─────────────────────────────────────────────────────────────────────────────
+const BACKGROUND_VIDEO_SRC = '/videos/background.mp4';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Vertex Shader — full-screen quad (NDC space)
+// ─────────────────────────────────────────────────────────────────────────────
+const VERT = /* glsl */ `
+  void main() {
+    gl_Position = vec4(position, 1.0);
+  }
+`;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Fragment Shader — premium luxury silk UV displacement (UNCHANGED)
+// ─────────────────────────────────────────────────────────────────────────────
+const FRAG = /* glsl */ `
+  precision highp float;
+
+  uniform sampler2D uVideo;
+  uniform vec2      uResolution;
+  uniform vec2      uMouseSmooth;
+  uniform vec2      uVelocity;
+  uniform float     uTime;
+
+  void main() {
+    vec2 uv      = gl_FragCoord.xy / uResolution;
+    float aspect = uResolution.x / uResolution.y;
+
+    vec2 mUv = uMouseSmooth * 0.5 + 0.5;
+
+    vec2 uvA = vec2(uv.x * aspect, uv.y);
+    vec2 mA  = vec2(mUv.x * aspect, mUv.y);
+
+    float dist  = length(uvA - mA);
+    float speed = length(uVelocity);
+
+    float falloff = exp(-dist * dist * 2.8);
+    vec2  dir     = normalize(mA - uvA + vec2(1e-5));
+    float mag     = falloff * clamp(speed * 0.6, 0.0, 1.0) * 0.025;
+
+    vec2 drift = vec2(
+      sin(uv.y * 3.0 + uTime * 0.18) * 0.004,
+      cos(uv.x * 3.0 + uTime * 0.14) * 0.003
+    );
+
+    // ── Edge attenuation mask ────────────────────────────────────────────────
+    // Root cause of top-edge smear: clamp(uv+displacement) repeats the last
+    // texture row when displaced UV exceeds 1.0. The fix is to fade displacement
+    // to zero BEFORE adding it to uv, so the displaced value never approaches
+    // the texture boundary — no clamping artifact is possible.
+    //
+    // smoothstep(0, M, t) = 0 at t=0, rises to 1 at t=M (smooth ramp from edge)
+    // smoothstep(1, 1-M, t) = 0 at t=1, rises to 1 at t=(1-M) (smooth ramp from far edge)
+    // Product of all four gives a mask that is 0 at every border, 1 at center.
+    float M      = 0.20;  // 20% margin — taper starts well inside each border,
+                          // covering the full 20-25% artifact region at screen edges
+    float maskX  = smoothstep(0.0, M, uv.x) * smoothstep(1.0, 1.0 - M, uv.x);
+    float maskY  = smoothstep(0.0, M, uv.y) * smoothstep(1.0, 1.0 - M, uv.y);
+    float eMask  = maskX * maskY;
+
+    // Apply mask to displacement only — uv itself is never displaced at borders
+    vec2 displaced = uv + (dir * mag + drift) * eMask;
+
+    vec4 color = texture2D(uVideo, displaced);
+    color.rgb += falloff * clamp(speed * 0.4, 0.0, 1.0) * 0.08;
+
+    gl_FragColor = color;
+  }
+`;
+
+export default function Home() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // ── Renderer ──────────────────────────────────────────────────────────────
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const scene  = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Dual-Video Seamless Loop
+    //
+    // Architecture:
+    //   Two <video> elements (videoA, videoB) share the same src.
+    //   An offscreen 2D canvas composites them with globalAlpha.
+    //   THREE.CanvasTexture samples that canvas — the shader is unchanged.
+    //
+    // State machine (runs forever):
+    //   videoA plays  →  at XFADE_START_TIME start videoB from t=0
+    //   crossfade A→B over XFADE_DURATION seconds (smoothstep alpha)
+    //   swap pointers: videoA←videoB, reset old videoA for next cycle
+    //   repeat
+    //
+    // Root cause of previous regression:
+    //   `crossfadeAlpha` was used as BOTH linear accumulator AND smoothstep
+    //   output. smoothstep(x)≈3x² near 0, so the accumulator barely grew.
+    //   The crossfade never completed; both videos eventually ended.
+    //
+    // Fix: `xfadeProgress` is the LINEAR accumulator (0→1 over XFADE_DURATION).
+    //      `drawAlpha = smoothstep(xfadeProgress)` is used only for drawing.
+    //      Completion is checked against `xfadeProgress`, not `drawAlpha`.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const VIDEO_DURATION   = 10.0;   // seconds — exact duration of background.mp4
+    const XFADE_DURATION   = 1.5;    // seconds of crossfade overlap
+    const XFADE_START_TIME = VIDEO_DURATION - XFADE_DURATION; // 8.5 s
+
+    // Offscreen 2D canvas — receives composited video frames each tick
+    const blendCanvas = document.createElement('canvas');
+    blendCanvas.width  = 1280;
+    blendCanvas.height = 720;
+    const ctx = blendCanvas.getContext('2d')!;
+
+    // Helper — create a muted, non-looping video element
+    const makeVideo = () => {
+      const v = document.createElement('video');
+      v.src         = BACKGROUND_VIDEO_SRC;
+      v.loop        = false;   // We drive the loop manually
+      v.muted       = true;
+      v.playsInline = true;
+      v.preload     = 'auto';
+      return v;
+    };
+
+    let videoA = makeVideo();
+    let videoB = makeVideo();
+
+    // ── State machine variables ───────────────────────────────────────────────
+    let isCrossfading  = false;
+    let xfadeProgress  = 0;    // LINEAR 0→1 accumulator — the fix
+    let bStarted       = false;
+
+    // Start primary video
+    videoA.play().catch(() => {});
+
+    // THREE.CanvasTexture wraps the blend canvas — shader samples this
+    const canvasTexture = new THREE.CanvasTexture(blendCanvas);
+    canvasTexture.minFilter  = THREE.LinearFilter;
+    canvasTexture.magFilter  = THREE.LinearFilter;
+    // ClampToEdge: UV coordinates outside [0,1] sample the border pixel, not a
+    // wrapped/mirrored copy. Combined with the edge mask above, the border pixel
+    // is never sampled because displacement is zero there.
+    canvasTexture.wrapS = THREE.ClampToEdgeWrapping;
+    canvasTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+    // ── Shader material ───────────────────────────────────────────────────────
+    const uniforms = {
+      uVideo:       { value: canvasTexture },
+      uResolution:  { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+      uMouseSmooth: { value: new THREE.Vector2(0, 0) },
+      uVelocity:    { value: new THREE.Vector2(0, 0) },
+      uTime:        { value: 0 },
+    };
+
+    const material = new THREE.ShaderMaterial({
+      vertexShader:   VERT,
+      fragmentShader: FRAG,
+      uniforms,
+      depthWrite: false,
+      depthTest:  false,
+    });
+
+    scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
+
+    // ── Mouse tracking ────────────────────────────────────────────────────────
+    const rawMouse  = new THREE.Vector2(0, 0);
+    const lerpMouse = new THREE.Vector2(0, 0);
+    const prevMouse = new THREE.Vector2(0, 0);
+    const velocity  = new THREE.Vector2(0, 0);
+    const lerpVel   = new THREE.Vector2(0, 0);
+
+    const onMouseMove = (e: MouseEvent) => {
+      rawMouse.set(
+        (e.clientX / window.innerWidth)  *  2 - 1,
+        (e.clientY / window.innerHeight) * -2 + 1,
+      );
+    };
+    window.addEventListener('mousemove', onMouseMove);
+
+    const onResize = () => {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener('resize', onResize);
+
+    // ── Render loop ───────────────────────────────────────────────────────────
+    const clock = new THREE.Clock();
+    let rafId: number;
+
+    const tick = () => {
+      rafId = requestAnimationFrame(tick);
+      const dt = clock.getDelta();
+
+      // ── Crossfade state machine ─────────────────────────────────────────────
+
+      // STEP 1: Detect when to enter crossfade
+      if (!isCrossfading && videoA.currentTime >= XFADE_START_TIME && !videoA.paused) {
+        isCrossfading = true;
+        xfadeProgress = 0;    // reset LINEAR accumulator
+        bStarted      = false;
+      }
+
+      // STEP 2: Run crossfade
+      if (isCrossfading) {
+
+        // Start videoB exactly once per crossfade cycle
+        if (!bStarted) {
+          videoB.currentTime = 0;
+          videoB.play().catch(() => {});
+          bStarted = true;
+        }
+
+        // Advance LINEAR accumulator by dt/duration → 0 to 1 in XFADE_DURATION seconds
+        xfadeProgress = Math.min(xfadeProgress + dt / XFADE_DURATION, 1.0);
+
+        // Smoothstep applied separately for drawing — does NOT feed back into accumulator
+        const t = xfadeProgress;
+        const drawAlpha = t * t * (3.0 - 2.0 * t);
+
+        // Composite: draw A fully, then B at smoothstep alpha
+        if (videoA.readyState >= 2) {
+          ctx.globalAlpha = 1.0;
+          ctx.drawImage(videoA, 0, 0, blendCanvas.width, blendCanvas.height);
+          if (videoB.readyState >= 2) {
+            ctx.globalAlpha = drawAlpha;
+            ctx.drawImage(videoB, 0, 0, blendCanvas.width, blendCanvas.height);
+            ctx.globalAlpha = 1.0;
+          }
+          canvasTexture.needsUpdate = true;
+        }
+
+        // STEP 3: Crossfade complete — swap and reset for next cycle
+        if (xfadeProgress >= 1.0) {
+          // Swap pointers: new videoA is old videoB (already playing from t=0)
+          const old = videoA;
+          videoA    = videoB;
+          videoB    = old;
+
+          // Reset old videoA (now videoB) so it's ready for the next crossfade
+          videoB.pause();
+          videoB.currentTime = 0;
+
+          // Reset state machine for next cycle
+          isCrossfading = false;
+          xfadeProgress = 0;
+          bStarted      = false;
+        }
+
+      } else {
+        // Normal playback — draw videoA at full opacity
+        if (videoA.readyState >= 2) {
+          ctx.globalAlpha = 1.0;
+          ctx.drawImage(videoA, 0, 0, blendCanvas.width, blendCanvas.height);
+          canvasTexture.needsUpdate = true;
+        }
+      }
+
+      // ── Mouse lerp (unchanged) ──────────────────────────────────────────────
+      const lerpFactor = 1 - Math.pow(0.06, dt * 60);
+      lerpMouse.lerp(rawMouse, lerpFactor);
+
+      velocity.subVectors(lerpMouse, prevMouse).divideScalar(Math.max(dt, 0.001));
+      prevMouse.copy(lerpMouse);
+
+      lerpVel.lerp(velocity, 1 - Math.pow(0.04, dt * 60));
+
+      uniforms.uMouseSmooth.value.copy(lerpMouse);
+      uniforms.uVelocity.value.copy(lerpVel);
+      uniforms.uTime.value += dt;
+
+      renderer.render(scene, camera);
+    };
+    tick();
+
+    // ── Cleanup ───────────────────────────────────────────────────────────────
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('resize', onResize);
+      videoA.pause(); videoA.removeAttribute('src');
+      videoB.pause(); videoB.removeAttribute('src');
+      canvasTexture.dispose();
+      material.dispose();
+      renderer.dispose();
+    };
+  }, []);
+
+  return (
+    <main style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', overflow: 'hidden' }}>
+      <canvas
+        ref={canvasRef}
+        style={{ display: 'block', width: '100%', height: '100%', pointerEvents: 'none' }}
+      />
+    </main>
+  );
+}

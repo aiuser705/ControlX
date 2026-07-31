@@ -1,0 +1,649 @@
+{
+  "project": {
+    "title": "ControlX - Process Timeline & Workflow Experience",
+    "version": "2.1.0-production-spec",
+    "frame_rate": 60,
+    "target_resolution": {
+      "width": 1920,
+      "height": 1080,
+      "aspect_ratio": "16:9"
+    },
+    "theme": "Luxurious Glassmorphism & Interactive 3D Nodes Timeline",
+    "design_system_tokens": {
+      "base_font_size": "16px",
+      "border_radius": {
+        "sm": "8px",
+        "md": "16px",
+        "lg": "24px",
+        "pill": "9999px"
+      },
+      "colors": {
+        "primary_bg": "#EBE9E1",
+        "primary_bg_gradient_start": "#FAF9F5",
+        "primary_bg_gradient_end": "#E2DFD5",
+        "text_primary": "#18191C",
+        "text_secondary": "#686D76",
+        "emerald_green_accent": "#0F8259",
+        "emerald_green_light": "#10B981",
+        "glass_border": "rgba(255, 255, 255, 0.4)",
+        "glass_bg": "rgba(255, 255, 255, 0.25)"
+      }
+    }
+  },
+  "camera": {
+    "type": "PerspectiveCamera",
+    "fov": 45,
+    "near": 0.1,
+    "far": 1000,
+    "initial_position": { "x": 0, "y": 0, "z": 8.0 },
+    "target_look_at": { "x": 0, "y": 0, "z": 0 },
+    "choreography": [
+      {
+        "timestamp_start": "00:00.000",
+        "timestamp_end": "00:01.500",
+        "position_from": { "x": 0, "y": 0, "z": 8.0 },
+        "position_to": { "x": 0, "y": 0, "z": 8.0 },
+        "rotation_from": { "x": 0, "y": 0, "z": 0 },
+        "rotation_to": { "x": 0, "y": 0, "z": 0 },
+        "easing": "linear"
+      },
+      {
+        "timestamp_start": "00:01.500",
+        "timestamp_end": "00:04.500",
+        "position_from": { "x": 0, "y": 0, "z": 8.0 },
+        "position_to": { "x": -0.5, "y": -1.8, "z": 7.0 },
+        "rotation_from": { "x": 0, "y": 0, "z": 0 },
+        "rotation_to": { "x": -0.04, "y": 0.02, "z": 0 },
+        "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+      },
+      {
+        "timestamp_start": "00:04.501",
+        "timestamp_end": "00:07.500",
+        "position_from": { "x": -0.5, "y": -1.8, "z": 7.0 },
+        "position_to": { "x": 1.2, "y": -3.5, "z": 5.8 },
+        "rotation_from": { "x": -0.04, "y": 0.02, "z": 0 },
+        "rotation_to": { "x": -0.08, "y": -0.05, "z": 0 },
+        "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+      },
+      {
+        "timestamp_start": "00:07.501",
+        "timestamp_end": "00:10.000",
+        "position_from": { "x": 1.2, "y": -3.5, "z": 5.8 },
+        "position_to": { "x": 0, "y": -7.2, "z": 7.5 },
+        "rotation_from": { "x": -0.08, "y": -0.05, "z": 0 },
+        "rotation_to": { "x": 0, "y": 0, "z": 0 },
+        "easing": "cubic-bezier(0.25, 1, 0.5, 1)"
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "time_start": "00:00.000",
+      "time_end": "00:01.500",
+      "section": "Process Header Entrance",
+      "camera_motion": "Fixed camera position z=8.0. Zero tilt.",
+      "background": "Solid studio background #EBE9E1 with suspended 3D fluid droplets.",
+      "foreground": "'From Vision to Reality' title with interactive green underline accent.",
+      "objects": [
+        {
+          "object_id": "section_heading_text",
+          "type": "DOM_Element",
+          "selector": "#process-heading",
+          "content": "From Vision to Reality",
+          "font_family": "Playfair Display, serif",
+          "font_size": "68px",
+          "font_weight": "600",
+          "color": "#18191C",
+          "position": { "x": "center", "y": "center" },
+          "opacity": 1.0
+        },
+        {
+          "object_id": "heading_underline_svg",
+          "type": "SVG_Vector",
+          "selector": "#heading-underline",
+          "dimensions": { "width": "480px", "height": "4px" },
+          "color": "#0F8259",
+          "stroke_width": "4px",
+          "stroke_dasharray": 480,
+          "stroke_dashoffset_initial": 480,
+          "stroke_dashoffset_final": 0
+        }
+      ],
+      "animation_sequence": [
+        {
+          "step": 1,
+          "target": "#process-heading",
+          "property": "transform: translateY",
+          "from": "30px",
+          "to": "0px",
+          "duration": "0.6s",
+          "delay": "0.1s",
+          "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        {
+          "step": 2,
+          "target": "#heading-underline",
+          "property": "stroke-dashoffset",
+          "from": 480,
+          "to": 0,
+          "duration": "0.9s",
+          "delay": "0.3s",
+          "easing": "cubic-bezier(0.25, 1, 0.5, 1)"
+        }
+      ],
+      "transition": "Camera translate Y down into timeline track view",
+      "lighting": "Studio lighting setup: Key Light 1.2, Fill Light 0.5",
+      "colors": "#EBE9E1 background, #18191C heading, #0F8259 underline",
+      "materials": "Flat vector DOM typography over WebGL studio floor",
+      "hover_effects": "None",
+      "scroll_behavior": "Locked during opening line reveal sequence",
+      "gsap_equivalent": "const tl = gsap.timeline(); tl.from('#process-heading', { y: 30, opacity: 0, duration: 0.6, ease: 'power3.out' }).to('#heading-underline', { strokeDashoffset: 0, duration: 0.9, ease: 'power2.out' }, '-=0.3');",
+      "threejs_equivalent": "N/A for main typography; background droplets drift via requestAnimationFrame.",
+      "css_equivalent": "@keyframes drawLine { from { stroke-dashoffset: 480; } to { stroke-dashoffset: 0; } }",
+      "notes": "Introduces agency methodology section before detailing step-by-step workflow."
+    },
+    {
+      "time_start": "00:01.501",
+      "time_end": "00:04.500",
+      "section": "Interactive Node Track Reveal",
+      "camera_motion": "Camera moves down and zooms into process rail track (z: 8.0 -> 7.0, y: 0 -> -1.8).",
+      "background": "Silk fluid wave backdrop with dynamic refraction map.",
+      "foreground": "Continuous 3D green glass tube rail with 8 disc nodes: Discover, Research, Strategy, Design, Development, Launch, Support, Support.",
+      "objects": [
+        {
+          "object_id": "timeline_glass_tube",
+          "type": "WebGL_Mesh",
+          "geometry": "TubeGeometry / CurvePath",
+          "material": {
+            "type": "MeshPhysicalMaterial",
+            "color": "#0F8259",
+            "transmission": 0.92,
+            "roughness": 0.08,
+            "ior": 1.48,
+            "thickness": 0.3
+          }
+        },
+        {
+          "object_id": "node_discs_array",
+          "type": "WebGL_InstancedMesh",
+          "count": 8,
+          "geometry": "CylinderGeometry(radiusTop=0.3, radiusBottom=0.3, height=0.1)",
+          "labels": ["Discover", "Research", "Strategy", "Design", "Development", "Launch", "Support", "Support"],
+          "material": {
+            "type": "MeshPhysicalMaterial",
+            "color": "#0F8259",
+            "transmission": 0.95,
+            "roughness": 0.04,
+            "ior": 1.52
+          }
+        }
+      ],
+      "animation_sequence": [
+        {
+          "step": 1,
+          "target": ".timeline-tube",
+          "property": "stroke / mesh draw range",
+          "from": 0,
+          "to": 1.0,
+          "duration": "1.2s",
+          "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        {
+          "step": 2,
+          "target": ".node-disc",
+          "property": "scale",
+          "from": 0,
+          "to": 1.0,
+          "stagger": "0.1s",
+          "duration": "0.5s",
+          "easing": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+        }
+      ],
+      "transition": "ScrollTrigger Scrubbed Pinning across node steps",
+      "lighting": "Point light emerald accent position [0, -1, 2] illuminating glass tube interior",
+      "colors": "#0F8259 emerald nodes, rgba(255,255,255,0.3) cards, #18191C text",
+      "materials": "Physical glass shader with high chromatic transmission",
+      "hover_effects": "Cursor hover over node 'Design' highlights node glow and scales disc 1.25x",
+      "scroll_behavior": "Pin process section horizontally as user scrolls vertically",
+      "gsap_equivalent": "gsap.to('.node-disc', { scale: 1, stagger: 0.1, duration: 0.5, ease: 'back.out(1.7)' });",
+      "threejs_equivalent": "instancedNodes.matrixNeedsUpdate = true; tubeMesh.geometry.setDrawRange(0, count);",
+      "css_equivalent": ".node-label { transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }",
+      "notes": "3D visual metaphor connecting agency workflow steps with interactive glass nodes."
+    },
+    {
+      "time_start": "00:04.501",
+      "time_end": "00:07.500",
+      "section": "Deep Focus Node Inspection",
+      "camera_motion": "Camera zooms close-up to 'Strategy' and 'Design' nodes (z: 5.8, y: -3.5, x: 1.2).",
+      "background": "Refractive glass liquid background with subtle motion distortion.",
+      "foreground": "Close-up 3D glass discs showing inner icon engravings and popped 'View Glastic' card panel.",
+      "objects": [
+        {
+          "object_id": "focused_node_card",
+          "type": "Glassmorphism_Panel",
+          "dimensions": { "width": "320px", "height": "220px", "border_radius": "16px" },
+          "backdrop_filter": "blur(18px)",
+          "background": "rgba(255, 255, 255, 0.28)",
+          "border": "1px solid rgba(255, 255, 255, 0.45)",
+          "content": {
+            "title": "Strategy",
+            "icon": "Document / Analytics Line Icon",
+            "cta": "View Glastic"
+          }
+        }
+      ],
+      "animation_sequence": [
+        {
+          "step": 1,
+          "target": "#focused-node-card",
+          "property": "transform: scale(1.0) translateY(0)",
+          "from": "scale(0.8) translateY(20px)",
+          "to": "scale(1.0) translateY(0)",
+          "duration": "0.5s",
+          "easing": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+        }
+      ],
+      "transition": "Translate Y to Outro Section",
+      "lighting": "Key spotlight hitting top bevel of emerald glass node disc",
+      "colors": "Emerald #0F8259, Glass border rgba(255,255,255,0.45), Text #18191C",
+      "materials": "Refractive glass mesh with interior caustics shader pass",
+      "hover_effects": "Cursor interacts with 'View Glastic' button, triggering green fill state",
+      "scroll_behavior": "Smooth inertia scroll progression",
+      "gsap_equivalent": "gsap.to('#focused-node-card', { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.7)' });",
+      "threejs_equivalent": "nodeMaterial.roughness = 0.02; nodeMaterial.ior = 1.55;",
+      "css_equivalent": "#focused-node-card { backdrop-filter: blur(18px); transition: transform 0.4s ease; }",
+      "notes": "Micro-level inspection mode demonstrating individual service phase details."
+    },
+    {
+      "time_start": "00:07.501",
+      "time_end": "00:10.000",
+      "section": "Brand Closing & Value Proposition",
+      "camera_motion": "Camera pulls back to center view z=7.5, Y=-7.2.",
+      "background": "Studio floor neutral ground with direction-mapped cast shadow.",
+      "foreground": "Heading 'Built to grow with your business.', 3D Emerald 'X' Logo Mesh, CONTROL X Branding, 100% Progress Bar.",
+      "objects": [
+        {
+          "object_id": "value_prop_heading",
+          "type": "DOM_Typography",
+          "content": "Built to grow with your business.",
+          "font_family": "Playfair Display, serif",
+          "font_size": "42px",
+          "font_weight": "600",
+          "color": "#18191C"
+        },
+        {
+          "object_id": "3d_emerald_x_logo",
+          "type": "WebGL_Mesh_Group",
+          "geometry": "Custom 'X' Polyhedron / Fragmented Glass Assembly",
+          "position": { "x": 0, "y": -6.5, "z": 0 },
+          "scale": { "x": 1.2, "y": 1.2, "z": 1.2 },
+          "material": {
+            "type": "MeshPhysicalMaterial",
+            "color": "#0F8259",
+            "transmission": 0.95,
+            "opacity": 1.0,
+            "transparent": true,
+            "roughness": 0.05,
+            "metalness": 0.0,
+            "ior": 1.52,
+            "thickness": 0.8,
+            "specularIntensity": 1.0,
+            "clearcoat": 1.0,
+            "clearcoatRoughness": 0.1
+          }
+        },
+        {
+          "object_id": "footer_brand_title",
+          "type": "DOM_Typography",
+          "content": "CONTROL X",
+          "font_family": "Plus Jakarta Sans, sans-serif",
+          "font_size": "36px",
+          "font_weight": "800",
+          "letter_spacing": "0.1em",
+          "color": "#18191C"
+        },
+        {
+          "object_id": "footer_tagline",
+          "type": "DOM_Typography",
+          "content": "Your Vision \u00d7 Our Expertise",
+          "font_family": "Playfair Display, serif",
+          "font_size": "20px",
+          "font_weight": "400",
+          "color": "#686D76"
+        },
+        {
+          "object_id": "progress_indicator_bar",
+          "type": "DOM_Progress_Track",
+          "dimensions": { "width": "100%", "height": "3px" },
+          "background_track": "rgba(0, 0, 0, 0.08)",
+          "background_fill": "#0F8259",
+          "completion_value": "100%"
+        }
+      ],
+      "animation_sequence": [
+        {
+          "step": 1,
+          "target": "#value-prop-heading",
+          "property": "opacity",
+          "from": 0,
+          "to": 1.0,
+          "duration": "0.8s",
+          "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        {
+          "step": 2,
+          "target": "3d_emerald_x_logo",
+          "property": "rotation.y",
+          "from": -0.4,
+          "to": 0.0,
+          "duration": "1.2s",
+          "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        {
+          "step": 3,
+          "target": "#progress-fill",
+          "property": "width",
+          "from": "85%",
+          "to": "100%",
+          "duration": "0.8s",
+          "easing": "cubic-bezier(0.25, 1, 0.5, 1)"
+        }
+      ],
+      "transition": "End Frame Hold",
+      "lighting": "Centered spotlight creating vibrant emerald refraction cast on studio floor plane.",
+      "colors": "Background #EBE9E1, Emerald #0F8259, Title #18191C, Subtitle #686D76",
+      "materials": "3D Refractive Physical Glass Mesh + DOM text elements",
+      "hover_effects": "3D logo gentle tilt following mouse position vector",
+      "scroll_behavior": "End of scroll track; rigid position clamp",
+      "gsap_equivalent": "gsap.to('#value-prop-heading', { opacity: 1, duration: 0.8 }); gsap.to(logoMesh.rotation, { y: 0, duration: 1.2, ease: 'power3.out' }); gsap.to('#progress-fill', { width: '100%', duration: 0.8 });",
+      "threejs_equivalent": "logoMesh.rotation.y = THREE.MathUtils.lerp(logoMesh.rotation.y, targetRotationY, 0.05);",
+      "css_equivalent": "#progress-fill { width: 100%; transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1); }",
+      "notes": "Concludes the workflow journey with strong call-to-value and completed 100% progress state."
+    }
+  ],
+  "sections": [
+    { "id": "sec_01", "name": "Process Header Section", "height": "100vh", "layout": "Flexbox Centered" },
+    { "id": "sec_02", "name": "3D Interactive Node Rail Track", "height": "250vh", "layout": "WebGL Canvas Pinned Track" },
+    { "id": "sec_03", "name": "Node Detail Inspector Panel", "height": "100vh", "layout": "Absolute Centered Focus Panel" },
+    { "id": "sec_04", "name": "Value Prop & Brand Footer Outro", "height": "80vh", "layout": "Flexbox Column Stacked" }
+  ],
+  "background": {
+    "type": "Custom Fragment Shader Plane",
+    "primary_color": "#EBE9E1",
+    "secondary_color": "#FAF9F5",
+    "accent_color": "#0F8259",
+    "shader_uniforms": {
+      "uTime": { "type": "f", "value": 0.0 },
+      "uResolution": { "type": "v2", "value": [1920, 1080] },
+      "uMouse": { "type": "v2", "value": [0.5, 0.5] },
+      "uNoiseDensity": { "type": "f", "value": 0.02 },
+      "uViscosity": { "type": "f", "value": 0.75 }
+    },
+    "fragment_shader_code": "uniform float uTime; uniform vec2 uResolution; uniform vec2 uMouse; varying vec2 vUv; void main() { vec2 st = gl_FragCoord.xy / uResolution.xy; float wave = sin(st.x * 4.0 + uTime * 0.5) * cos(st.y * 4.0 + uTime * 0.5) * 0.05; vec3 baseColor = mix(vec3(0.92, 0.91, 0.88), vec3(0.98, 0.97, 0.96), st.y + wave); gl_FragColor = vec4(baseColor, 1.0); }"
+  },
+  "lighting": {
+    "ambient_light": {
+      "color": "#FFFFFF",
+      "intensity": 0.75
+    },
+    "directional_lights": [
+      {
+        "id": "key_light",
+        "color": "#FFFFFF",
+        "intensity": 1.2,
+        "position": { "x": 5.0, "y": 10.0, "z": 7.0 },
+        "cast_shadow": true
+      },
+      {
+        "id": "fill_light",
+        "color": "#D1E7DD",
+        "intensity": 0.5,
+        "position": { "x": -5.0, "y": -2.0, "z": 4.0 },
+        "cast_shadow": false
+      }
+    ],
+    "point_lights": [
+      {
+        "id": "emerald_accent_light",
+        "color": "#0F8259",
+        "intensity": 0.8,
+        "position": { "x": 0.0, "y": -1.0, "z": 2.0 },
+        "distance": 10.0,
+        "decay": 2.0
+      }
+    ]
+  },
+  "typography": {
+    "font_families": {
+      "serif_heading": "'Playfair Display', Georgia, serif",
+      "sans_body": "'Plus Jakarta Sans', system-ui, sans-serif"
+    },
+    "scale_hierarchy": {
+      "display_hero": { "size": "68px", "line_height": "1.1", "weight": "600", "font": "serif_heading" },
+      "section_header": { "size": "42px", "line_height": "1.15", "weight": "600", "font": "serif_heading" },
+      "node_label": { "size": "16px", "line_height": "1.2", "weight": "600", "font": "sans_body" },
+      "card_title": { "size": "22px", "line_height": "1.25", "weight": "600", "font": "sans_body" },
+      "body_text": { "size": "15px", "line_height": "1.5", "weight": "400", "font": "sans_body" }
+    }
+  },
+  "colors": {
+    "canvas_background": "#EBE9E1",
+    "text_primary": "#18191C",
+    "text_secondary": "#686D76",
+    "emerald_accent": "#0F8259",
+    "emerald_hover": "#10B981",
+    "glass_fill": "rgba(255, 255, 255, 0.28)",
+    "glass_border": "rgba(255, 255, 255, 0.45)",
+    "glass_shadow": "rgba(0, 0, 0, 0.06)"
+  },
+  "glass_materials": {
+    "3d_emerald_rail_and_nodes": {
+      "shader_type": "MeshPhysicalMaterial",
+      "color": "#0F8259",
+      "transmission": 0.94,
+      "roughness": 0.06,
+      "metalness": 0.0,
+      "ior": 1.52,
+      "thickness": 0.6,
+      "attenuationColor": "#0F8259",
+      "attenuationDistance": 0.4,
+      "clearcoat": 1.0,
+      "clearcoatRoughness": 0.08
+    },
+    "ui_glass_panel": {
+      "backdrop_filter": "blur(18px) saturate(180%)",
+      "background": "rgba(255, 255, 255, 0.28)",
+      "border_stroke": "1px solid rgba(255, 255, 255, 0.45)",
+      "box_shadow": "0 18px 36px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.6)"
+    }
+  },
+  "animations": [
+    {
+      "animation_name": "Process Header Entrance",
+      "duration": "0.6s",
+      "delay": "0.1s",
+      "ease": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "direction": "Y Offset to 0",
+      "opacity": { "from": 0, "to": 1 },
+      "scale": { "from": 1.0, "to": 1.0 },
+      "rotation": { "from": "0deg", "to": "0deg" },
+      "position": { "from": "0, 30px, 0", "to": "0, 0, 0" },
+      "blur": { "from": "4px", "to": "0px" },
+      "mask_reveal": true,
+      "clip_path": "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
+      "parallax": false,
+      "spring": null,
+      "elastic": 0,
+      "scroll_trigger": false,
+      "mouse_trigger": false,
+      "idle_motion": null,
+      "hover_motion": null
+    },
+    {
+      "animation_name": "Node Disc Scale Entrance",
+      "duration": "0.5s",
+      "delay": "0.2s",
+      "ease": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+      "direction": "Scale 0 to 1",
+      "opacity": { "from": 0, "to": 1 },
+      "scale": { "from": 0, "to": 1.0 },
+      "rotation": { "from": "0deg", "to": "0deg" },
+      "position": { "from": "0, 0, 0", "to": "0, 0, 0" },
+      "blur": { "from": "0px", "to": "0px" },
+      "mask_reveal": false,
+      "clip_path": "none",
+      "parallax": true,
+      "spring": { "stiffness": 140, "damping": 12 },
+      "elastic": 0,
+      "scroll_trigger": true,
+      "mouse_trigger": true,
+      "idle_motion": "Pulse scale +/- 0.03 over 2.0s",
+      "hover_motion": "Scale 1.25x, emission glow intensity 1.5"
+    }
+  ],
+  "micro_interactions": [
+    {
+      "element_selector": ".node-disc",
+      "trigger": "mouseenter",
+      "action": [
+        "Scale target node disc mesh to 1.25x over 0.2s",
+        "Illuminate point light at node coordinates to intensity 1.5",
+        "Fade in corresponding glass detail card with translateY -10px"
+      ]
+    },
+    {
+      "element_selector": ".btn-glastic",
+      "trigger": "hover",
+      "action": [
+        "Animate inner green fill color from #0F8259 to #10B981 over 0.2s",
+        "Shift icon vector +3px upward right"
+      ]
+    }
+  ],
+  "cursor": {
+    "type": "Custom Canvas Pointer",
+    "outer_ring": {
+      "radius": "20px",
+      "border_width": "1.5px",
+      "border_color": "rgba(24, 25, 28, 0.4)",
+      "lag_factor": 0.12
+    },
+    "inner_dot": {
+      "radius": "3px",
+      "fill_color": "#0F8259",
+      "lag_factor": 0.02
+    },
+    "hover_states": [
+      { "target": "a, button", "scale_outer": 1.8, "fill_outer": "rgba(15, 130, 89, 0.15)", "hide_dot": true },
+      { "target": ".node-disc", "scale_outer": 2.4, "label_text": "INSPECT" }
+    ]
+  },
+  "scroll_behavior": {
+    "engine": "Lenis Smooth Scroll / GSAP ScrollTrigger",
+    "lerp_smoothness": 0.08,
+    "wheel_multiplier": 1.0,
+    "touch_multiplier": 1.5,
+    "orientation": "vertical",
+    "pinning_schedule": [
+      { "section_id": "sec_02", "pin_duration": "200vh", "anticipate_pin": 1 }
+    ]
+  },
+  "components": [
+    {
+      "component_name": "Navbar",
+      "type": "Header Navigation",
+      "position": "fixed top 0 left 0 width 100%",
+      "height": "80px",
+      "elements": [
+        { "name": "Brand Logo", "content": "ControlX Symbol + Typography" },
+        { "name": "Navigation Links", "items": ["Design", "Create & More", "Testing", "Sports", "More"] },
+        { "name": "Search Button", "type": "Pill Input Field" },
+        { "name": "Sign Up Button", "type": "Primary Glass CTA Button" }
+      ]
+    },
+    {
+      "component_name": "3D Timeline Rail",
+      "type": "Interactive WebGL Node Track",
+      "layout": "Spline Curved Path across 8 workflow steps",
+      "nodes_count": 8,
+      "spacing_gap": "Dynamic Spline Points"
+    },
+    {
+      "component_name": "Progress Track Footer",
+      "type": "Global Scroll Indicator",
+      "position": "fixed bottom 0 left 0 width 100%",
+      "height": "4px",
+      "color_fill": "#0F8259"
+    }
+  ],
+  "layout": {
+    "container_max_width": "1440px",
+    "grid_structure": "12 Columns",
+    "column_gap": "24px",
+    "side_padding": "64px"
+  },
+  "spacing": {
+    "section_margin_bottom": "120px",
+    "card_inner_padding": "28px",
+    "heading_margin_bottom": "24px",
+    "element_stack_gap": "16px"
+  },
+  "depth": {
+    "z_index_layers": {
+      "webgl_canvas_background": 0,
+      "timeline_nodes_layer": 10,
+      "page_content_grid": 20,
+      "sticky_header_navbar": 100,
+      "custom_cursor_layer": 999
+    }
+  },
+  "effects": {
+    "post_processing_stack": {
+      "bloom": {
+        "enabled": true,
+        "intensity": 0.35,
+        "threshold": 0.82,
+        "radius": 0.5
+      },
+      "chromatic_aberration": {
+        "enabled": true,
+        "offset": [0.0015, 0.0015]
+      },
+      "vignette": {
+        "enabled": true,
+        "darkness": 0.15,
+        "offset": 0.9
+      }
+    }
+  },
+  "motion": {
+    "bezier_curves": {
+      "standard_entrance": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "expressive_spring": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+      "smooth_exit": "cubic-bezier(0.7, 0, 0.84, 0)"
+    },
+    "durations": {
+      "fast": "0.2s",
+      "medium": "0.5s",
+      "slow": "1.0s",
+      "choreographed_hero": "1.5s"
+    }
+  },
+  "performance_notes": {
+    "fps_target": 60,
+    "gpu_budget": "Keep tube geometry vertices under 20k tris; use InstancedMesh for the 8 timeline node discs.",
+    "dom_budget": "Keep DOM node updates lightweight; promote floating glass cards to GPU composite layers.",
+    "fallback_strategy": "On low-GPU hardware, replace MeshPhysicalMaterial caustics with simplified MeshBasicMaterial plus static glass backdrop filter."
+  },
+  "implementation_notes": {
+    "recommended_stack": [
+      "Next.js 14+ (App Router)",
+      "Three.js / React Three Fiber (@react-three/fiber)",
+      "@react-three/drei (CatmullRomCurve3, MeshPhysicalMaterial, Environment)",
+      "GSAP 3+ (ScrollTrigger, MotionPathPlugin)",
+      "TailwindCSS (Layout & Styling)",
+      "@studio-freight/lenis (Smooth scroll synchronization)"
+    ],
+    "critical_path_execution": "1. Build CatmullRomCurve3 path for green tube rail -> 2. Position InstancedMesh node discs along curve parameter t -> 3. Sync GSAP ScrollTrigger timeline to progress t from 0.0 to 1.0 on scroll -> 4. Overlay DOM detail cards on node hover/focus triggers."
+  }
+}

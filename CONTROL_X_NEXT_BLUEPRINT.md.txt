@@ -1,0 +1,434 @@
+CONTROL_X_NEXT_BLUEPRINT.md
+1. Project Dependencies & Configuration
+package.json
+JSON
+{
+  "name": "control-x-experience",
+  "version": "2.2.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.105.0",
+    "@react-three/fiber": "^8.16.0",
+    "@studio-freight/lenis": "^1.0.42",
+    "clsx": "^2.1.0",
+    "framer-motion": "^11.0.8",
+    "gsap": "^3.12.5",
+    "lucide-react": "^0.354.0",
+    "next": "14.1.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwind-merge": "^2.2.2",
+    "three": "^0.163.0",
+    "three-stdlib": "^2.29.9"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.2.67",
+    "@types/react-dom": "^18.2.22",
+    "@types/three": "^0.163.0",
+    "autoprefixer": "^10.4.19",
+    "glslify": "^7.1.1",
+    "glslify-loader": "^2.0.0",
+    "postcss": "^8.4.38",
+    "raw-loader": "^4.0.2",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.4.3"
+  }
+}
+2. GLSL Shader Implementations
+Background Liquid Shader: src/shaders/background.glsl.ts
+TypeScript
+export const BackgroundShader = {
+  uniforms: {
+    uTime: { value: 0.0 },
+    uResolution: { value: [1920, 1080] },
+    uMouse: { value: [0.5, 0.5] },
+    uColorStart: { value: [0.98, 0.97, 0.96] }, // #FAF9F5
+    uColorEnd: { value: [0.88, 0.87, 0.83] }     // #E2DFD5
+  },
+  vertexShader: /* glsl */ `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: /* glsl */ `
+    uniform float uTime;
+    uniform vec2 uResolution;
+    uniform vec2 uMouse;
+    uniform vec3 uColorStart;
+    uniform vec3 uColorEnd;
+    varying vec2 vUv;
+
+    void main() {
+      vec2 st = gl_FragCoord.xy / uResolution.xy;
+      vec2 mouseEffect = uMouse * 0.03;
+      
+      float wave = sin(st.x * 3.5 + uTime * 0.4 + mouseEffect.x) * 
+                   cos(st.y * 3.5 + uTime * 0.4 + mouseEffect.y) * 0.04;
+                   
+      vec3 finalColor = mix(uColorStart, uColorEnd, st.y + wave);
+      gl_FragColor = vec4(finalColor, 1.0);
+    }
+  `
+};
+GPU Particle Compute Shader: src/shaders/particles.glsl.ts
+TypeScript
+export const ParticleShader = {
+  uniforms: {
+    uTime: { value: 0.0 },
+    uProgress: { value: 0.0 },
+    uBaseColor: { value: [0.058, 0.509, 0.349] }, // #0F8259
+    uHighlightColor: { value: [0.062, 0.725, 0.505] } // #10B981
+  },
+  vertexShader: /* glsl */ `
+    uniform float uTime;
+    uniform float uProgress;
+    attribute vec3 aVelocity;
+    attribute float aScale;
+    varying float vAlpha;
+    varying vec3 vColor;
+    
+    uniform vec3 uBaseColor;
+    uniform vec3 uHighlightColor;
+
+    void main() {
+      vec3 pos = position;
+      
+      // Spiral trajectory calculation
+      float angle = uTime * 1.5 + pos.y * 0.5;
+      float radius = length(pos.xz) + sin(uTime * 2.0 + pos.y) * 0.2;
+      
+      pos.x = cos(angle) * radius + aVelocity.x * uProgress * 2.0;
+      pos.z = sin(angle) * radius + aVelocity.z * uProgress * 2.0;
+      pos.y += aVelocity.y * uProgress * 1.5;
+
+      vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+      gl_PointSize = (aScale * 12.0) * (1.0 / -mvPosition.z) * (1.0 + uProgress);
+      gl_Position = projectionMatrix * mvPosition;
+
+      vAlpha = smoothstep(0.0, 0.2, uProgress) * (1.0 - smoothstep(0.8, 1.0, uProgress));
+      vColor = mix(uBaseColor, uHighlightColor, sin(pos.y + uTime) * 0.5 + 0.5);
+    }
+  `,
+  fragmentShader: /* glsl */ `
+    varying float vAlpha;
+    varying vec3 vColor;
+
+    void main() {
+      float dist = length(gl_PointCoord - vec2(0.5));
+      if (dist > 0.5) discard;
+      
+      float softEdge = smoothstep(0.5, 0.0, dist);
+      gl_FragColor = vec4(vColor, vAlpha * softEdge);
+    }
+  `
+};
+3. WebGL Canvas & Mesh Components
+Refractive Glass Mesh: src/components/canvas/GlassXMesh.tsx
+TypeScript
+"use client";
+
+import React, { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
+
+interface GlassXMeshProps {
+  progress: number;
+}
+
+export const GlassXMesh: React.FC<GlassXMeshProps> = ({ progress }) => {
+  const meshRef = useRef<THREE.Group>(null);
+  const materialRef = useRef<THREE.MeshPhysicalMaterial>(null);
+
+  useFrame((state, delta) => {
+    if (meshRef.current) {
+      // Idle float oscillation
+      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.08;
+      meshRef.current.rotation.y = THREE.MathUtils.lerp(
+        meshRef.current.rotation.y,
+        state.pointer.x * 0.3,
+        0.05
+      );
+      meshRef.current.rotation.x = THREE.MathUtils.lerp(
+        meshRef.current.rotation.x,
+        -state.pointer.y * 0.2,
+        0.05
+      );
+    }
+  });
+
+  return (
+    <group ref={meshRef} position={[0, 0, 0]} scale={[1.2, 1.2, 1.2]}>
+      {/* Primary Polyhedral Glass X Body */}
+      <mesh>
+        <boxGeometry args={[0.8, 2.8, 0.4]} />
+        <meshPhysicalMaterial
+          ref={materialRef}
+          color="#0F8259"
+          transmission={0.95}
+          opacity={1.0}
+          transparent={true}
+          roughness={0.05}
+          metalness={0.0}
+          ior={1.52}
+          thickness={0.8}
+          attenuationColor="#0F8259"
+          attenuationDistance={0.5}
+          clearcoat={1.0}
+          clearcoatRoughness={0.1}
+          reflectivity={0.9}
+        />
+      </mesh>
+      <mesh rotation={[0, 0, Math.PI / 2]}>
+        <boxGeometry args={[0.8, 2.8, 0.4]} />
+        <meshPhysicalMaterial
+          color="#0F8259"
+          transmission={0.95}
+          opacity={1.0}
+          transparent={true}
+          roughness={0.05}
+          metalness={0.0}
+          ior={1.52}
+          thickness={0.8}
+          attenuationColor="#0F8259"
+          attenuationDistance={0.5}
+          clearcoat={1.0}
+          clearcoatRoughness={0.1}
+        />
+      </mesh>
+    </group>
+  );
+};
+Process Timeline Rail Track: src/components/canvas/ProcessRail.tsx
+TypeScript
+"use client";
+
+import React, { useMemo } from "react";
+import * as THREE from "three";
+
+export const ProcessRail: React.FC = () => {
+  const curve = useMemo(() => {
+    return new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-4, 0, 0),
+      new THREE.Vector3(-2, 0.5, 0.5),
+      new THREE.Vector3(0, -0.2, 0),
+      new THREE.Vector3(2, 0.4, -0.5),
+      new THREE.Vector3(4, 0, 0)
+    ]);
+  }, []);
+
+  const tubeGeometry = useMemo(() => {
+    return new THREE.TubeGeometry(curve, 64, 0.08, 16, false);
+  }, [curve]);
+
+  return (
+    <mesh geometry={tubeGeometry}>
+      <meshPhysicalMaterial
+        color="#0F8259"
+        transmission={0.92}
+        roughness={0.08}
+        ior={1.48}
+        thickness={0.3}
+        transparent={true}
+        opacity={0.85}
+      />
+    </mesh>
+  );
+};
+4. DOM Layout & Interactive Components
+Main App Shell: src/app/page.tsx
+TypeScript
+"use client";
+
+import React, { useEffect, useRef } from "react";
+import { Canvas } from "@react-three/fiber";
+import Lenis from "@studio-freight/lenis";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+import { GlassXMesh } from "@/components/canvas/GlassXMesh";
+import { ProcessRail } from "@/components/canvas/ProcessRail";
+import { Navbar } from "@/components/dom/Navbar";
+import { ServicesGrid } from "@/components/dom/ServicesGrid";
+import { ContactForm } from "@/components/dom/ContactForm";
+
+gsap.registerPlugin(ScrollTrigger);
+
+export default function Home() {
+  const mainRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Initialize Lenis Smooth Scroll Engine
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+      smoothWheel: true
+    });
+
+    lenis.on("scroll", ScrollTrigger.update);
+
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+
+    gsap.ticker.lagSmoothing(0);
+
+    // ScrollTrigger Choreography Pipeline
+    const ctx = gsap.context(() => {
+      gsap.to(".hero-title", {
+        scrollTrigger: {
+          trigger: ".sec-hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: true
+        },
+        y: -100,
+        opacity: 0
+      });
+    }, mainRef);
+
+    return () => {
+      lenis.destroy();
+      ctx.revert();
+    };
+  }, []);
+
+  return (
+    <main ref={mainRef} className="relative bg-[#EBE9E1] text-[#18191C] min-h-screen selection:bg-[#0F8259] selection:text-white">
+      {/* WebGL Experience Layer */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <Canvas
+          camera={{ position: [0, 0, 8], fov: 45, near: 0.1, far: 1000 }}
+          gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+          dpr={[1, 2]}
+        >
+          <ambientLight intensity={0.75} />
+          <directionalLight position={[5, 10, 7]} intensity={1.2} />
+          <pointLight position={[0, -1, 2]} intensity={0.8} color="#0F8259" />
+          
+          <GlassXMesh progress={0} />
+          <ProcessRail />
+        </Canvas>
+      </div>
+
+      {/* Interactive DOM Layer */}
+      <div className="relative z-10">
+        <Navbar />
+
+        {/* Hero Section */}
+        <section className="sec-hero h-screen flex flex-col justify-center items-center text-center px-6">
+          <h1 className="hero-title font-serif text-6xl md:text-7xl font-semibold tracking-tight max-w-4xl leading-tight">
+            Prensiuny chartiment eveaqual, atligitions of Our elepritis.
+          </h1>
+          <div className="mt-8 flex gap-4">
+            <button className="px-8 py-3.5 bg-[#0F8259] text-white font-sans font-bold text-sm rounded-full shadow-lg hover:bg-[#10B981] transition-all duration-300">
+              Read Review
+            </button>
+          </div>
+        </section>
+
+        {/* Services Section */}
+        <section className="sec-services min-h-screen py-28 px-8 max-w-7xl mx-auto">
+          <h2 className="font-serif text-4xl md:text-5xl font-semibold mb-16">Services</h2>
+          <ServicesGrid />
+        </section>
+
+        {/* Contact Section */}
+        <section className="sec-contact min-h-screen py-28 flex flex-col justify-center items-center px-6">
+          <h2 className="font-serif text-5xl md:text-6xl text-center mb-12">
+            Let&apos;s Build Something<br />Extraordinary Together.
+          </h2>
+          <ContactForm />
+        </section>
+
+        {/* Footer Outro */}
+        <footer className="py-16 text-center border-t border-black/10">
+          <h3 className="font-sans text-3xl font-extrabold tracking-widest">CONTROL X</h3>
+          <p className="font-serif text-gray-600 mt-2">Your Vision × Our Expertise</p>
+        </footer>
+      </div>
+    </main>
+  );
+}
+Services Grid Component: src/components/dom/ServicesGrid.tsx
+TypeScript
+"use client";
+
+import React from "react";
+
+const SERVICES_DATA = [
+  { id: "01", title: "Seltubic Develops", desc: "Cerant olauc cvepote umaltrinite dectutates, and diret antit who defenllping atamainess." },
+  { "id": "02", title: "Nature Interratioc", desc: "Commodity and deherancy and accritilating resfiuctives charsingis, deloite & consfectors." },
+  { id: "03", title: "Completing Services", desc: "Domnicos ad accare eorind nexun, inferciar, fast leirees smiitn, datolaciar mreaforters." },
+  { id: "04", title: "Botal Devices", desc: "Lorem ipsum all ealing tasts izari." },
+  { id: "05", title: "Mesolty Desinge", desc: "Dusteiphanss melay eirastade." },
+  { id: "06", title: "Punic Citama", desc: "Spreem ipsum fmoronsgund arfood." }
+];
+
+export const ServicesGrid: React.FC = () => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {SERVICES_DATA.map((service) => (
+        <div
+          key={service.id}
+          className="p-8 rounded-2xl bg-white/25 backdrop-blur-xl border border-white/40 shadow-xl hover:-translate-y-2 hover:border-white/80 transition-all duration-400 ease-out group"
+        >
+          <h3 className="font-sans text-xl font-semibold text-[#18191C] mb-3 group-hover:text-[#0F8259] transition-colors">
+            {service.title}
+          </h3>
+          <p className="font-sans text-sm text-[#686D76] leading-relaxed mb-6">
+            {service.desc}
+          </p>
+          <button className="px-5 py-2 rounded-full border border-black/20 font-sans text-xs font-bold tracking-wider hover:bg-[#0F8259] hover:text-white hover:border-[#0F8259] transition-all">
+            Read more
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+};
+5. Tailored Design Token Utilities
+Tailwind Configuration: tailwind.config.js
+JavaScript
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}"
+  ],
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          bg: "#EBE9E1",
+          text: "#18191C",
+          muted: "#686D76",
+          emerald: "#0F8259",
+          "emerald-light": "#10B981"
+        }
+      },
+      fontFamily: {
+        serif: ["'Playfair Display'", "Georgia", "serif"],
+        sans: ["'Plus Jakarta Sans'", "system-ui", "sans-serif"]
+      },
+      backdropBlur: {
+        glass: "20px"
+      },
+      transitionTimingFunction: {
+        quartz: "cubic-bezier(0.16, 1, 0.3, 1)",
+        spring: "cubic-bezier(0.34, 1.56, 0.64, 1)"
+      }
+    }
+  },
+  plugins: []
+};

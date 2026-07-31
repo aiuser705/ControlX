@@ -1,0 +1,625 @@
+{
+  "project": {
+    "title": "ControlX Interactive Selected Work Experience",
+    "version": "2.0.0-production-spec",
+    "frame_rate": 60,
+    "target_resolution": {
+      "width": 1920,
+      "height": 1080,
+      "aspect_ratio": "16:9"
+    },
+    "theme": "Hyper-realistic Glassmorphism & Modern Interactive WebGL Layout",
+    "design_system_tokens": {
+      "base_font_size": "16px",
+      "border_radius": {
+        "sm": "8px",
+        "md": "16px",
+        "lg": "24px",
+        "pill": "9999px"
+      },
+      "colors": {
+        "primary_bg": "#EBE9E1",
+        "primary_bg_gradient_start": "#FAF9F5",
+        "primary_bg_gradient_end": "#E2DFD5",
+        "text_primary": "#18191C",
+        "text_secondary": "#686D76",
+        "emerald_green_accent": "#0F8259",
+        "emerald_green_light": "#10B981",
+        "glass_border": "rgba(255, 255, 255, 0.4)",
+        "glass_bg": "rgba(255, 255, 255, 0.25)"
+      }
+    }
+  },
+  "camera": {
+    "type": "PerspectiveCamera",
+    "fov": 45,
+    "near": 0.1,
+    "far": 1000,
+    "initial_position": { "x": 0, "y": 0, "z": 8.0 },
+    "target_look_at": { "x": 0, "y": 0, "z": 0 },
+    "choreography": [
+      {
+        "timestamp_start": "00:00.000",
+        "timestamp_end": "00:01.500",
+        "position_from": { "x": 0, "y": 0, "z": 8.0 },
+        "position_to": { "x": 0, "y": 0, "z": 8.0 },
+        "rotation_from": { "x": 0, "y": 0, "z": 0 },
+        "rotation_to": { "x": 0, "y": 0, "z": 0 },
+        "easing": "linear"
+      },
+      {
+        "timestamp_start": "00:01.500",
+        "timestamp_end": "00:05.500",
+        "position_from": { "x": 0, "y": 0, "z": 8.0 },
+        "position_to": { "x": 0, "y": -2.5, "z": 10.5 },
+        "rotation_from": { "x": 0, "y": 0, "z": 0 },
+        "rotation_to": { "x": -0.05, "y": 0, "z": 0 },
+        "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+      },
+      {
+        "timestamp_start": "00:05.500",
+        "timestamp_end": "00:08.000",
+        "position_from": { "x": 0, "y": -2.5, "z": 10.5 },
+        "position_to": { "x": 0, "y": -5.0, "z": 9.0 },
+        "rotation_from": { "x": -0.05, "y": 0, "z": 0 },
+        "rotation_to": { "x": 0, "y": 0, "z": 0 },
+        "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+      },
+      {
+        "timestamp_start": "00:08.000",
+        "timestamp_end": "00:10.000",
+        "position_from": { "x": 0, "y": -5.0, "z": 9.0 },
+        "position_to": { "x": 0, "y": -7.2, "z": 7.5 },
+        "rotation_from": { "x": 0, "y": 0, "z": 0 },
+        "rotation_to": { "x": 0, "y": 0, "z": 0 },
+        "easing": "cubic-bezier(0.25, 1, 0.5, 1)"
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "time_start": "00:00.000",
+      "time_end": "00:01.200",
+      "section": "Title Reveal Phase",
+      "camera_motion": "Fixed perspective camera at z=8.0. Zero translation.",
+      "background": "Solid background #EBE9E1 with ambient fluid wave displacement in WebGL shader layer.",
+      "foreground": "Centered 'Selected Work' text display with animating underline stroke.",
+      "objects": [
+        {
+          "object_id": "intro_heading_text",
+          "type": "DOM_Element",
+          "selector": "#intro-heading",
+          "content": "Selected Work",
+          "font_family": "Playfair Display, serif",
+          "font_size": "72px",
+          "font_weight": "600",
+          "color": "#18191C",
+          "position": { "x": "center", "y": "center" },
+          "opacity": 1.0
+        },
+        {
+          "object_id": "intro_accent_underline",
+          "type": "SVG_Vector",
+          "selector": "#intro-underline",
+          "dimensions": { "width": "220px", "height": "4px" },
+          "color": "#0F8259",
+          "stroke_width": "4px",
+          "stroke_dasharray": 220,
+          "stroke_dashoffset_initial": 220,
+          "stroke_dashoffset_final": 0
+        }
+      ],
+      "animation_sequence": [
+        {
+          "step": 1,
+          "target": "#intro-heading",
+          "property": "transform: translateY",
+          "from": "40px",
+          "to": "0px",
+          "duration": "0.6s",
+          "delay": "0.1s",
+          "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        {
+          "step": 2,
+          "target": "#intro-underline",
+          "property": "stroke-dashoffset",
+          "from": 220,
+          "to": 0,
+          "duration": "0.8s",
+          "delay": "0.3s",
+          "easing": "cubic-bezier(0.25, 1, 0.5, 1)"
+        }
+      ],
+      "transition": "Zoom Out & Translate Y sequence into main grid view",
+      "lighting": "Studio lighting setup: Light 1 intensity 0.7, Light 2 intensity 1.1",
+      "colors": "#EBE9E1 background, #18191C title, #0F8259 underline",
+      "materials": "Canvas background shader pass + CSS rendering",
+      "hover_effects": "None",
+      "scroll_behavior": "Locked until completion of 1.2s reveal sequence",
+      "gsap_equivalent": "const tl = gsap.timeline(); tl.from('#intro-heading', { y: 40, opacity: 0, duration: 0.6, ease: 'power3.out' }).to('#intro-underline', { strokeDashoffset: 0, duration: 0.8, ease: 'power2.out' }, '-=0.3');",
+      "threejs_equivalent": "N/A for main typography; background plane uniforms 'uTime' updated via requestAnimationFrame.",
+      "css_equivalent": "@keyframes drawLine { from { stroke-dashoffset: 220; } to { stroke-dashoffset: 0; } }",
+      "notes": "Establishes brand identity prior to dynamic portfolio grid presentation."
+    },
+    {
+      "time_start": "00:01.201",
+      "time_end": "00:05.500",
+      "section": "Portfolio Glass Grid Sequence",
+      "camera_motion": "Camera pulls back and translates vertically along Y axis (-2.5).",
+      "background": "Refractive glass liquid backdrop with live WebGL chromatic aberration.",
+      "foreground": "Multi-card layout featuring glassmorphism surfaces and nested website frames.",
+      "objects": [
+        {
+          "object_id": "glass_card_01",
+          "type": "Glassmorphism_Card",
+          "dimensions": { "width": "480px", "height": "320px", "border_radius": "20px" },
+          "backdrop_filter": "blur(20px) saturate(180%)",
+          "background": "rgba(255, 255, 255, 0.25)",
+          "border": "1px solid rgba(255, 255, 255, 0.4)",
+          "content": {
+            "title": "Exgle haspobiells for stark",
+            "subtitle": "TRUETS & TROSE",
+            "metrics": ["1.7K Memo Invocations", "135 Yearan Ratios", "2.17 Sike", "2.55 Adaptable"],
+            "cta_button": { "label": "View Case Study", "border_radius": "9999px" }
+          }
+        },
+        {
+          "object_id": "glass_card_02",
+          "type": "Glassmorphism_Card",
+          "dimensions": { "width": "480px", "height": "320px", "border_radius": "20px" },
+          "backdrop_filter": "blur(20px) saturate(180%)",
+          "background": "rgba(255, 255, 255, 0.25)",
+          "border": "1px solid rgba(255, 255, 255, 0.4)",
+          "content": {
+            "title": "Fevenal Vanneric",
+            "subtitle": "Teu clteicory fic heargy, new voyd peklte",
+            "cta_button": { "label": "View Case Study" }
+          }
+        }
+      ],
+      "animation_sequence": [
+        {
+          "step": 1,
+          "target": ".glass-card",
+          "property": "transform: translateY(100px) scale(0.92)",
+          "from": "translateY(100px) scale(0.92)",
+          "to": "translateY(0px) scale(1.0)",
+          "stagger": "0.15s",
+          "duration": "1.0s",
+          "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        {
+          "step": 2,
+          "target": "#cursor-follower",
+          "property": "transform: translate(x, y)",
+          "path": "Interpolates along smooth Bezier curve over card 01",
+          "duration": "2.0s"
+        }
+      ],
+      "transition": "ScrollTrigger Scrubbed Pinning and Motion",
+      "lighting": "Spotlight position [3.0, 8.0, 5.0], intensity 1.2; Point light emerald tint position [0, -1, 2]",
+      "colors": "Glass panel background rgba(255,255,255,0.25), text #18191C, accent #0F8259",
+      "materials": "Physical glass shader layer over WebGL framebuffer with depth-blur.",
+      "hover_effects": "Card elevates along Z axis (+12px), box-shadow expands, glass border opacity shifts to 0.8.",
+      "scroll_behavior": "Pin horizontal card container while translating virtual camera downward.",
+      "gsap_equivalent": "gsap.to('.glass-card', { scrollTrigger: { trigger: '#portfolio-grid', start: 'top top', end: 'bottom bottom', scrub: 1 }, y: 0, opacity: 1, stagger: 0.2 });",
+      "threejs_equivalent": "cardsGroup.children.forEach((card, index) => { gsap.to(card.position, { y: targetY[index], duration: 1 }); });",
+      "css_equivalent": ".glass-card { backdrop-filter: blur(20px); background: rgba(255, 255, 255, 0.25); border: 1px solid rgba(255, 255, 255, 0.4); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }",
+      "notes": "Engineered using hybrid DOM-over-WebGL overlay technique."
+    },
+    {
+      "time_start": "00:05.501",
+      "time_end": "00:08.000",
+      "section": "Featured Case Study Focus",
+      "camera_motion": "Direct frontal alignment z=9.0, lock camera Y axis at -5.0.",
+      "background": "Fluid distortion wave mesh with increased viscosity ripple effect.",
+      "foreground": "Delkre Project featured card, elevated to front depth level.",
+      "objects": [
+        {
+          "object_id": "featured_card",
+          "type": "Primary_Glass_Card",
+          "dimensions": { "width": "540px", "height": "360px" },
+          "content": {
+            "title": "Delkre Project sted Wich — natures new portfolio",
+            "cta": "View Case Study"
+          }
+        }
+      ],
+      "animation_sequence": [
+        {
+          "step": 1,
+          "target": "#featured-card",
+          "property": "transform: scale(1.05) translateZ(20px)",
+          "duration": "0.6s",
+          "easing": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+        }
+      ],
+      "transition": "Fade into Brand Outro Footer",
+      "lighting": "Central spotlight focused directly on featured glass card face",
+      "colors": "Primary text #18191C, CTA fill #0F8259, glass reflection #FFFFFF",
+      "materials": "High-IOR mesh physical material with specular intensity 1.0",
+      "hover_effects": "CTA button transitions from transparent glass border to solid #0F8259 fill with white text.",
+      "scroll_behavior": "Smooth inertia continuation",
+      "gsap_equivalent": "gsap.to('#featured-card', { scale: 1.05, z: 20, duration: 0.6, ease: 'back.out(1.7)' });",
+      "threejs_equivalent": "mesh.material.roughness = 0.04; mesh.material.transmission = 0.98;",
+      "css_equivalent": "#featured-card:hover { transform: scale(1.05) translateZ(20px); }",
+      "notes": "Pinnacle focus frame before transition to closing brand identity."
+    },
+    {
+      "time_start": "00:08.001",
+      "time_end": "00:10.000",
+      "section": "Brand Finale Outro",
+      "camera_motion": "Camera locks at central position z=7.5, Y=-7.2.",
+      "background": "Studio floor neutral ground with direction-mapped cast shadow.",
+      "foreground": "3D Emerald Glass 'X' Logo Mesh, 'CONTROL X' typography, 'Your Vision x Our Expertise' subtitle, 100% progress counter.",
+      "objects": [
+        {
+          "object_id": "3d_emerald_x_logo",
+          "type": "WebGL_Mesh_Group",
+          "geometry": "Custom 'X' Polyhedron / Fragmented Glass Assembly",
+          "position": { "x": 0, "y": -6.5, "z": 0 },
+          "scale": { "x": 1.2, "y": 1.2, "z": 1.2 },
+          "material": {
+            "type": "MeshPhysicalMaterial",
+            "color": "#0F8259",
+            "transmission": 0.95,
+            "opacity": 1.0,
+            "transparent": true,
+            "roughness": 0.05,
+            "metalness": 0.0,
+            "ior": 1.52,
+            "thickness": 0.8,
+            "specularIntensity": 1.0,
+            "clearcoat": 1.0,
+            "clearcoatRoughness": 0.1
+          }
+        },
+        {
+          "object_id": "footer_brand_title",
+          "type": "DOM_Typography",
+          "content": "CONTROL X",
+          "font_family": "Plus Jakarta Sans, sans-serif",
+          "font_size": "36px",
+          "font_weight": "800",
+          "letter_spacing": "0.1em",
+          "color": "#18191C"
+        },
+        {
+          "object_id": "footer_tagline",
+          "type": "DOM_Typography",
+          "content": "Your Vision \u00d7 Our Expertise",
+          "font_family": "Playfair Display, serif",
+          "font_size": "20px",
+          "font_weight": "400",
+          "color": "#686D76"
+        },
+        {
+          "object_id": "progress_indicator_bar",
+          "type": "DOM_Progress_Track",
+          "dimensions": { "width": "100%", "height": "3px" },
+          "background_track": "rgba(0, 0, 0, 0.08)",
+          "background_fill": "#0F8259",
+          "completion_value": "100%"
+        }
+      ],
+      "animation_sequence": [
+        {
+          "step": 1,
+          "target": "3d_emerald_x_logo",
+          "property": "rotation.y",
+          "from": -0.5,
+          "to": 0.0,
+          "duration": "1.2s",
+          "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        {
+          "step": 2,
+          "target": "#progress-fill",
+          "property": "width",
+          "from": "80%",
+          "to": "100%",
+          "duration": "1.0s",
+          "easing": "cubic-bezier(0.25, 1, 0.5, 1)"
+        }
+      ],
+      "transition": "End Frame Hold",
+      "lighting": "Centered spotlight creating vibrant emerald refraction cast on studio floor plane.",
+      "colors": "Background #EBE9E1, Emerald #0F8259, Title #18191C, Subtitle #686D76",
+      "materials": "3D Refractive Physical Glass Mesh + DOM text elements",
+      "hover_effects": "3D logo gentle tilt following mouse position vector",
+      "scroll_behavior": "End of scroll track; rigid position clamp",
+      "gsap_equivalent": "gsap.to(logoMesh.rotation, { y: 0, duration: 1.2, ease: 'power3.out' }); gsap.to('#progress-fill', { width: '100%', duration: 1.0 });",
+      "threejs_equivalent": "logoMesh.rotation.y = THREE.MathUtils.lerp(logoMesh.rotation.y, targetRotationY, 0.05);",
+      "css_equivalent": "#progress-fill { width: 100%; transition: width 1.0s cubic-bezier(0.25, 1, 0.5, 1); }",
+      "notes": "Concludes user journey with iconic emerald brand mark."
+    }
+  ],
+  "sections": [
+    { "id": "sec_01", "name": "Title Intro Reveal", "height": "100vh", "layout": "Flexbox Centered" },
+    { "id": "sec_02", "name": "Selected Work Glass Grid", "height": "200vh", "layout": "CSS Grid / WebGL Canvas Sync" },
+    { "id": "sec_03", "name": "Featured Case Focus Section", "height": "100vh", "layout": "Absolute Centered Focus Panel" },
+    { "id": "sec_04", "name": "Brand Outro & Progress Footer", "height": "80vh", "layout": "Flexbox Column Stacked" }
+  ],
+  "background": {
+    "type": "Custom Fragment Shader Plane",
+    "primary_color": "#EBE9E1",
+    "secondary_color": "#FAF9F5",
+    "accent_color": "#0F8259",
+    "shader_uniforms": {
+      "uTime": { "type": "f", "value": 0.0 },
+      "uResolution": { "type": "v2", "value": [1920, 1080] },
+      "uMouse": { "type": "v2", "value": [0.5, 0.5] },
+      "uNoiseDensity": { "type": "f", "value": 0.02 },
+      "uViscosity": { "type": "f", "value": 0.75 }
+    },
+    "fragment_shader_code": "uniform float uTime; uniform vec2 uResolution; uniform vec2 uMouse; varying vec2 vUv; void main() { vec2 st = gl_FragCoord.xy / uResolution.xy; float wave = sin(st.x * 4.0 + uTime * 0.5) * cos(st.y * 4.0 + uTime * 0.5) * 0.05; vec3 baseColor = mix(vec3(0.92, 0.91, 0.88), vec3(0.98, 0.97, 0.96), st.y + wave); gl_FragColor = vec4(baseColor, 1.0); }"
+  },
+  "lighting": {
+    "ambient_light": {
+      "color": "#FFFFFF",
+      "intensity": 0.75
+    },
+    "directional_lights": [
+      {
+        "id": "key_light",
+        "color": "#FFFFFF",
+        "intensity": 1.2,
+        "position": { "x": 5.0, "y": 10.0, "z": 7.0 },
+        "cast_shadow": true
+      },
+      {
+        "id": "fill_light",
+        "color": "#D1E7DD",
+        "intensity": 0.5,
+        "position": { "x": -5.0, "y": -2.0, "z": 4.0 },
+        "cast_shadow": false
+      }
+    ],
+    "point_lights": [
+      {
+        "id": "emerald_accent_light",
+        "color": "#0F8259",
+        "intensity": 0.8,
+        "position": { "x": 0.0, "y": -1.0, "z": 2.0 },
+        "distance": 10.0,
+        "decay": 2.0
+      }
+    ]
+  },
+  "typography": {
+    "font_families": {
+      "serif_heading": "'Playfair Display', Georgia, serif",
+      "sans_body": "'Plus Jakarta Sans', system-ui, sans-serif"
+    },
+    "scale_hierarchy": {
+      "display_hero": { "size": "72px", "line_height": "1.1", "weight": "600", "font": "serif_heading" },
+      "section_header": { "size": "48px", "line_height": "1.15", "weight": "600", "font": "serif_heading" },
+      "card_title": { "size": "24px", "line_height": "1.25", "weight": "600", "font": "sans_body" },
+      "card_subtitle": { "size": "12px", "line_height": "1.4", "weight": "700", "letter_spacing": "0.1em", "font": "sans_body" },
+      "body_text": { "size": "15px", "line_height": "1.5", "weight": "400", "font": "sans_body" },
+      "metric_value": { "size": "20px", "line_height": "1.2", "weight": "700", "font": "sans_body" },
+      "metric_label": { "size": "11px", "line_height": "1.3", "weight": "500", "font": "sans_body" }
+    }
+  },
+  "colors": {
+    "canvas_background": "#EBE9E1",
+    "text_primary": "#18191C",
+    "text_secondary": "#686D76",
+    "emerald_accent": "#0F8259",
+    "emerald_hover": "#10B981",
+    "glass_fill": "rgba(255, 255, 255, 0.25)",
+    "glass_border": "rgba(255, 255, 255, 0.4)",
+    "glass_shadow": "rgba(0, 0, 0, 0.06)"
+  },
+  "glass_materials": {
+    "3d_emerald_x": {
+      "shader_type": "MeshPhysicalMaterial",
+      "color": "#0F8259",
+      "transmission": 0.95,
+      "roughness": 0.05,
+      "metalness": 0.0,
+      "ior": 1.52,
+      "thickness": 0.8,
+      "attenuationColor": "#0F8259",
+      "attenuationDistance": 0.5,
+      "clearcoat": 1.0,
+      "clearcoatRoughness": 0.1
+    },
+    "ui_glass_card": {
+      "backdrop_filter": "blur(20px) saturate(180%)",
+      "background": "rgba(255, 255, 255, 0.25)",
+      "border_stroke": "1px solid rgba(255, 255, 255, 0.4)",
+      "box_shadow": "0 20px 40px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6)"
+    }
+  },
+  "animations": [
+    {
+      "animation_name": "Title Text Entrance",
+      "duration": "0.6s",
+      "delay": "0.1s",
+      "ease": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "direction": "Y Offset to 0",
+      "opacity": { "from": 0, "to": 1 },
+      "scale": { "from": 1.0, "to": 1.0 },
+      "rotation": { "from": "0deg", "to": "0deg" },
+      "position": { "from": "0, 40px, 0", "to": "0, 0, 0" },
+      "blur": { "from": "4px", "to": "0px" },
+      "mask_reveal": true,
+      "clip_path": "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
+      "parallax": false,
+      "spring": null,
+      "elastic": 0,
+      "scroll_trigger": false,
+      "mouse_trigger": false,
+      "idle_motion": null,
+      "hover_motion": null
+    },
+    {
+      "animation_name": "Glass Card Stagger Entrance",
+      "duration": "1.0s",
+      "delay": "0.2s",
+      "ease": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "direction": "Bottom to Top with Scale",
+      "opacity": { "from": 0, "to": 1 },
+      "scale": { "from": 0.92, "to": 1.0 },
+      "rotation": { "from": "1.5deg", "to": "0deg" },
+      "position": { "from": "0, 80px, 0", "to": "0, 0, 0" },
+      "blur": { "from": "10px", "to": "0px" },
+      "mask_reveal": false,
+      "clip_path": "none",
+      "parallax": true,
+      "spring": { "stiffness": 100, "damping": 15 },
+      "elastic": 0,
+      "scroll_trigger": true,
+      "mouse_trigger": true,
+      "idle_motion": "Sine wave float translateY +/- 4px over 3.5s",
+      "hover_motion": "TranslateZ +12px, Scale 1.02, Border opacity 0.8"
+    }
+  ],
+  "micro_interactions": [
+    {
+      "element_selector": ".btn-case-study",
+      "trigger": "mouseenter",
+      "action": [
+        "Animate background fill from transparent to #0F8259 over 0.25s",
+        "Change color text from #18191C to #FFFFFF over 0.2s",
+        "Translate inline arrow icon +4px right using elastic spring ease"
+      ]
+    },
+    {
+      "element_selector": ".glass-card",
+      "trigger": "mousemove",
+      "action": [
+        "Calculate mouse position relative to card center (dx, dy)",
+        "Apply 3D tilt transform: rotateX(-dy * 10deg) rotateY(dx * 10deg)",
+        "Shift specular glass highlight shader uniform light position"
+      ]
+    }
+  ],
+  "cursor": {
+    "type": "Custom Canvas Pointer",
+    "outer_ring": {
+      "radius": "20px",
+      "border_width": "1.5px",
+      "border_color": "rgba(24, 25, 28, 0.4)",
+      "lag_factor": 0.12
+    },
+    "inner_dot": {
+      "radius": "3px",
+      "fill_color": "#0F8259",
+      "lag_factor": 0.02
+    },
+    "hover_states": [
+      { "target": "a, button", "scale_outer": 1.8, "fill_outer": "rgba(15, 130, 89, 0.15)", "hide_dot": true },
+      { "target": ".glass-card", "scale_outer": 2.2, "label_text": "VIEW" }
+    ]
+  },
+  "scroll_behavior": {
+    "engine": "Lenis Smooth Scroll / GSAP ScrollTrigger",
+    "lerp_smoothness": 0.08,
+    "wheel_multiplier": 1.0,
+    "touch_multiplier": 1.5,
+    "orientation": "vertical",
+    "pinning_schedule": [
+      { "section_id": "sec_02", "pin_duration": "150vh", "anticipate_pin": 1 }
+    ]
+  },
+  "components": [
+    {
+      "component_name": "Navbar",
+      "type": "Header Navigation",
+      "position": "fixed top 0 left 0 width 100%",
+      "height": "80px",
+      "elements": [
+        { "name": "Brand Logo", "content": "ControlX Symbol + Typography" },
+        { "name": "Navigation Links", "items": ["Design", "Create & More", "Testing", "Sports", "More"] },
+        { "name": "Search Button", "type": "Pill Input Field" },
+        { "name": "Sign Up Button", "type": "Primary Glass CTA Button" }
+      ]
+    },
+    {
+      "component_name": "Portfolio Grid Track",
+      "type": "Interactive Card Container",
+      "layout": "Flex Horizontal / Dynamic Offset Grid",
+      "cards_count": 3,
+      "spacing_gap": "32px"
+    },
+    {
+      "component_name": "Progress Track Footer",
+      "type": "Global Scroll Indicator",
+      "position": "fixed bottom 0 left 0 width 100%",
+      "height": "4px",
+      "color_fill": "#0F8259"
+    }
+  ],
+  "layout": {
+    "container_max_width": "1440px",
+    "grid_structure": "12 Columns",
+    "column_gap": "24px",
+    "side_padding": "64px"
+  },
+  "spacing": {
+    "section_margin_bottom": "120px",
+    "card_inner_padding": "32px",
+    "heading_margin_bottom": "24px",
+    "element_stack_gap": "16px"
+  },
+  "depth": {
+    "z_index_layers": {
+      "webgl_canvas_background": 0,
+      "page_content_grid": 10,
+      "sticky_header_navbar": 100,
+      "custom_cursor_layer": 999
+    }
+  },
+  "effects": {
+    "post_processing_stack": {
+      "bloom": {
+        "enabled": true,
+        "intensity": 0.35,
+        "threshold": 0.82,
+        "radius": 0.5
+      },
+      "chromatic_aberration": {
+        "enabled": true,
+        "offset": [0.0015, 0.0015]
+      },
+      "vignette": {
+        "enabled": true,
+        "darkness": 0.15,
+        "offset": 0.9
+      }
+    }
+  },
+  "motion": {
+    "bezier_curves": {
+      "standard_entrance": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "expressive_spring": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+      "smooth_exit": "cubic-bezier(0.7, 0, 0.84, 0)"
+    },
+    "durations": {
+      "fast": "0.2s",
+      "medium": "0.5s",
+      "slow": "1.0s",
+      "choreographed_hero": "1.4s"
+    }
+  },
+  "performance_notes": {
+    "fps_target": 60,
+    "gpu_budget": "Keep fragment shader instruction count under 120 lines; use instancing for ambient particle dots.",
+    "dom_budget": "Keep animated nodes under 50 elements; enforce translate3d GPU layer promotion.",
+    "fallback_strategy": "If device Pixel Ratio > 2 or low performance detected, disable post-processing bloom pass and fallback to standard CSS backplate blur."
+  },
+  "implementation_notes": {
+    "recommended_stack": [
+      "Next.js 14+ (App Router)",
+      "Three.js / React Three Fiber (@react-three/fiber)",
+      "@react-three/drei (MeshPhysicalMaterial, Environment)",
+      "GSAP 3+ (ScrollTrigger, ScrollToPlugin)",
+      "TailwindCSS (Layout & Standard UI styling)",
+      "@studio-freight/lenis (Smooth scroll synchronization)"
+    ],
+    "critical_path_execution": "1. Initialize WebGL Canvas & Smooth Scroll Engine -> 2. Mount DOM Structure with Will-Change Layer Hooks -> 3. Bind ScrollTrigger timeline to WebGL Camera & Mesh Uniforms -> 4. Run RequestAnimationFrame render loop with uniform updates."
+  }
+}

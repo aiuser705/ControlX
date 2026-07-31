@@ -1,0 +1,503 @@
+=== PAGE 1 ===
+CONTROL X MASTER SPEC v2.2
+CONTROL_X_MASTER_SPEC.md1. Project OverviewProject VisionTo construct a luxury
+digital web application for ControlX, establishing an interactive benchmark for high-end
+digital agency platforms. The experience synthesizes editorial typography with
+real-time physical WebGL optics, glassmorphism UI layers, and fluid dynamics.
+┌─────────────────────────────────────────────────────────────┐
+│ DOM UI OVERLAY LAYER │
+│ [Navbar] [Typography] [Forms] [Glass Cards] [CTA] │
+└──────────────────────────────┬──────────────────────────────┘
+│ Alpha / Depth Blur Blending
+┌──────────────────────────────┴──────────────────────────────┐
+│ THREE.JS / WEBGL CANVAS │
+│ [3D Glass Mesh] [Physical Lights] [GPUParticleSystem] │
+└──────────────────────────────┬──────────────────────────────┘
+│ Framebuffer Pass
+┌──────────────────────────────┴──────────────────────────────┐
+│ GLSL POST-PROCESSING STACK │
+│ [Chromatic Aberration] [Unreal Bloom] [Vignette Pass] │
+└─────────────────────────────────────────────────────────────┘
+MissionTranslate high-level creative vision into a technical framework. The interface
+operates as a physical studio stage where 3D refractive assets, dynamic camera
+moves, and UI elements react to scroll momentum and pointer vectors.Brand
+PhilosophyPrecision Aesthetics: Clean editorial structure aligned with optical physical
+realism.Material Fidelity: Glass elements simulate physical properties: index of
+refraction ($IOR = 1.52$), internal absorption, specular dispersion, and chromatic
+aberration.Fluid Motion: Spatial motion follows physical mass, spring mechanics, and
+damped inertia.Creative DirectionColor Palette: Warm neutral studio tones (#EBE9E1)
+contrasting with emerald glass refractions (#0F8259).Typography: Dual-font
+hierarchy—Classic Serif (Playfair Display) for editorial headings, paired with Sans-Serif
+(Plus Jakarta Sans) for UI controls and numerical data.Depth Architecture: Multi-layered
+visual stack using WebGL depth buffers, glass refraction passes, and dynamic backdrop
+filters.Target Audience & Business GoalsTarget: Executive clientele, enterprise
+partners, luxury brands, and creative directors.Business Goal: Establish technical
+expertise through design execution, convert high-value leads via interactive inquiry
+touchpoints, and demonstrate digital craftsmanship.User Journey
+Map┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+│ 01. INTRO │───> │ 02. SERVICES │───> │ 03. PORTFOLIO │
+│ Emerald Assembly│ │ Glass Grid Cards│ │ Pinned Showcase │
+└─────────────────┘ └─────────────────┘ └─────────────────┘
+│
+
+
+=== PAGE 2 ===
+┌─────────────────┐ ┌─────────────────┐ │
+│ 05. OUTRO │ <───│ 04. PROCESS │ <─────────────────┘
+│ Contact & Footer│ │ Node Rail Track │
+└─────────────────┘ └─────────────────┘
+Success MetricsPerformance: Constant 60 FPS on desktop (DPR 2.0) and mobile (DPR
+1.0).First Contentful Paint (FCP): $< 0.8\text{s}$.Time to Interactive (TTI): $<
+1.8\text{s}$.Cumulative Layout Shift (CLS): $0.00$.2. Design LanguageLuxury &
+Editorial AestheticsThe visual hierarchy uses asymmetrical layouts, large display
+headers, and deliberate line heights. Spatial layout relies on high negative space ratios
+($> 55\%$) to maintain visual hierarchy.Glassmorphism OpticsGlass elements use
+backdrop blur filtering alongside WebGL-rendered refraction maps.CSS Backdrop Blur:
+$20\text{px} - 24\text{px}$ blur radius with saturation boost ($180\%$).WebGL
+Refraction: Custom MeshPhysicalMaterial with $IOR = 1.52$ (Simulating Crown Glass),
+$95\%$ transmission, and internal emerald attenuation.Motion PhilosophyAll spatial
+animations avoid linear easing curves. Movements utilize custom cubic-bezier curves
+or spring physics:Standard Structural Entrance: cubic-bezier(0.16, 1, 0.3, 1) (Power3 /
+Quartz Curve).Elastic UI Interactions: cubic-bezier(0.34, 1.56, 0.64, 1) (Back Out /
+Spring Pop).Inertia Scrolling: Damped spring lag with a smoothing lerp coefficient of
+$0.08$.Camera & Lighting PhilosophyThe camera functions as a physical lens with a
+fixed focal length ($f = 50\text{mm}$, $FOV = 45^\circ$). Lighting uses a three-point
+studio system:Key Light: High-intensity white directional light casting directional floor
+shadows.Fill Light: Soft cool fill light neutralizing shadow contrast.Accent Point Light:
+Emerald-tinted point light placed behind glass objects to highlight refractions.3. Global
+Design Tokens GLOBAL TOKEN TREE
+│
+┌─────────────────────────┼─────────────────────────┐
+│ │ │
+┌───▼───┐ ┌───▼───┐ ┌───▼───┐
+│COLORS │ │ TYPO │ │SPACING│
+└───┬───┘ └───┬───┘ └───┬───┘
+├── Primary: #EBE9E1 ├── Hero: 72px / 1.1 ├── Section: 120px
+├── Text: #18191C ├── H2: 48px / 1.15 ├── Card Gap: 32px
+└── Accent: #0F8259 └── Body: 15px / 1.5 └── Padding: 24px
+Color TokensJSON{
+"color": {
+"bg": {
+"primary": { "value": "#EBE9E1", "type": "color" },
+"gradient_start": { "value": "#FAF9F5", "type": "color" },
+"gradient_end": { "value": "#E2DFD5", "type": "color" }
+},
+
+
+=== PAGE 3 ===
+"text": { "primary": { "value": "#18191C", "type": "color" }, "secondary": { "value":
+"#686D76", "type": "color" }, "muted": { "value": "#9E9E9E", "type": "color" } },
+"accent": { "emerald": { "value": "#0F8259", "type": "color" }, "emerald_light": {
+"value": "#10B981", "type": "color" }, "emerald_glow": { "value": "rgba(15, 130, 89,
+0.35)", "type": "color" } },
+"glass": { "fill": { "value": "rgba(255, 255, 255, 0.25)", "type": "color" }, "border": {
+"value": "rgba(255, 255, 255, 0.40)", "type": "color" }, "shadow": { "value": "rgba(0, 0,
+0, 0.06)", "type": "color" } }
+}
+}
+Typography TokensJSON{
+"typography": {
+"family": { "serif": { "value": "'Playfair Display', Georgia, serif" }, "sans": { "value":
+"'Plus Jakarta Sans', system-ui, sans-serif" } },
+"display": { "hero": { "fontSize": "72px", "lineHeight": "1.1", "fontWeight": "600",
+"letterSpacing": "-0.02em" }, "h1": { "fontSize": "64px", "lineHeight": "1.12",
+"fontWeight": "600", "letterSpacing": "-0.02em" }, "h2": { "fontSize": "48px",
+"lineHeight": "1.15", "fontWeight": "600", "letterSpacing": "-0.01em" } },
+"ui": { "card_title": { "fontSize": "24px", "lineHeight": "1.25", "fontWeight": "600" },
+"body": { "fontSize": "15px", "lineHeight": "1.5", "fontWeight": "400" }, "button": {
+"fontSize": "14px", "lineHeight": "1.0", "fontWeight": "700", "letterSpacing": "0.05em"
+}, "label": { "fontSize": "12px", "lineHeight": "1.3", "fontWeight": "600",
+"letterSpacing": "0.1em" } }
+}
+}
+Spatial & Layout TokensJSON{
+"spacing": { "section_padding_y": "120px", "container_max_width": "1440px", "gutter":
+"24px", "card_padding": "32px", "element_gap": "16px" },
+"radius": { "sm": "8px", "md": "16px", "lg": "24px", "pill": "9999px" },
+"z_index": { "canvas": 0, "content": 10, "navbar": 100, "cursor": 999 }
+}
+CSS Custom Properties Variables ExportCSS:root {
+/* Colors */
+--color-bg-primary: #EBE9E1;
+--color-text-primary: #18191C;
+--color-text-secondary: #686D76;
+--color-accent-emerald: #0F8259;
+--color-accent-emerald-light: #10B981;
+
+
+=== PAGE 4 ===
+--color-glass-fill: rgba(255, 255, 255, 0.25);
+--color-glass-border: rgba(255, 255, 255, 0.40);
+ 
+/* Fonts */
+--font-serif: 'Playfair Display', Georgia, serif;
+--font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+ 
+/* Spatial */
+--container-max-width: 1440px;
+--radius-md: 16px;
+--radius-lg: 24px;
+--radius-pill: 9999px;
+ 
+/* Motion */
+--ease-quartz: cubic-bezier(0.16, 1, 0.3, 1);
+--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+4. Asset Manifest3D Models & WebGL GeometriesAsset IDPath / TypeVertex
+CountTarget TrisMaterial BindingsOptimization
+Strategygeo_x_shards/models/x_shards.glb24,50012,000mat_emerald_glassDraco
+Compression, Instanced
+Arraysgeo_node_discsTHREE.CylinderGeometry384192mat_node_glassGenerated via
+WebGL InstancedMeshgeo_tube_railTHREE.TubeGeometry2,0481,024mat_tube_glassC
+atmullRomCurve3 interpolationTextures & MapsTexture IDResolutionFormatColor
+SpacePurposetex_noise_alpha$512 \times 512$PNGLinearScreen-space grain
+overlaytex_hdr_studio$2048 \times 1024$HDRLinearEnvironment map for glass
+reflectionstex_normal_fluid$1024 \times 1024$PNGNormal MapNormal distortion map
+for background liquid shader5. Object Registry OBJECT REGISTRY SHADOW MATRIX
+┌───────────────────────┬──────────────────────┬──────────────────────┬─
+─────────────────────┐
+│ UUID │ NAME │ TYPE │ SCENE LAYER │
+├───────────────────────┼──────────────────────┼──────────────────────┼─
+─────────────────────┤
+│ obj_webgl_canvas │ Canvas Root │ HTMLCanvasElement │ Base WebGL (z-idx:0) │
+│ obj_3d_x_assembly │ Glass X Logo Mesh │ THREE.Group │ WebGL Scene │
+│ obj_3d_node_rail │ Process Tube Rail │ THREE.Mesh │ WebGL Scene │
+│ obj_ui_navbar │ Main Navbar │ HTMLElement │ DOM Layer (z-idx:100)│
+│ obj_ui_hero_title │ Hero Header Text │ HTMLElement │ DOM Layer (z-idx:10) │
+
+
+=== PAGE 5 ===
+│ obj_ui_services_grid │ Services 3x2 Grid │ HTMLElement │ DOM Layer (z-idx:10) │
+│ obj_ui_contact_card │ Glass Contact Form │ HTMLElement │ DOM Layer (z-idx:10) │
+└───────────────────────┴──────────────────────┴──────────────────────┴─
+─────────────────────┘
+Comprehensive Technical Declarationsobj_3d_x_assemblyUUID:
+c102a488-842e-4bdf-9921-992641040801Parent: scene_rootTransform Initial: Position
+$(0, 0, 0)$, Scale $(1, 1, 1)$, Rotation $(0, 0, 0)$.Material: mat_emerald_glass ($IOR =
+1.52$, Transmission $= 0.95$).Animation State: Implosion assembly on load ($t_0 -
+t_1.2s$), constant idle sine wave rotation ($y = \sin(t \cdot 0.5) \cdot 0.15$).Visibility
+Rules: Visible during Intro ($0s - 3s$) and Footer Outro ($8s - 10s$). Hidden during
+middle scroll sections via shader opacity uniform.obj_ui_services_gridUUID:
+a84920df-7711-41e2-b883-200921811702Parent: dom_bodyLayout Structure: CSS
+Grid (3 Columns $\times$ 2 Rows), Gap: $24\text{px}$.Glass Styling: backdrop-filter:
+blur(20px), background: rgba(255,255,255,0.25).Interaction State: Mouse hover
+induces card Z-translation ($+12\text{px}$) and border brightness shift.6. Scene
+Graphroot_application
+│
+├── dom_layer (z-index: 10 - 100)
+│ ├── comp_navbar (fixed, top: 0)
+│ │ ├── elem_brand_logo
+│ │ ├── elem_nav_links
+│ │ └── elem_signup_btn
+│ │
+│ ├── sec_hero (100vh)
+│ │ ├── elem_hero_title
+│ │ └── elem_hero_buttons
+│ │
+│ ├── sec_services (200vh)
+│ │ └── comp_services_grid (3x2 Cards)
+│ │
+│ ├── sec_portfolio (250vh)
+│ │ └── comp_horizontal_slider
+│ │
+│ ├── sec_process (250vh)
+│ │ └── comp_node_labels_overlay
+│ │
+│ ├── sec_contact (120vh)
+│ │ └── comp_glass_form_card
+
+
+=== PAGE 6 ===
+│ │
+│ └── comp_cursor (fixed, z-index: 999)
+│
+└── webgl_layer (z-index: 0)
+└── three_scene
+├── sys_camera (PerspectiveCamera)
+├── sys_lighting
+│ ├── light_ambient
+│ ├── light_directional
+│ └── light_emerald_point
+│
+├── mesh_background_plane (ShaderMaterial)
+├── mesh_x_glass_group (InstancedMesh)
+├── mesh_process_rail (TubeGeometry)
+└── sys_particle_emitter (GPUParticleSystem)
+7. Camera System CAMERA MOTION CHOREOGRAPHY TRACK
+Z-Pos
+10.5 ──┐
+│ ┌───────────────┐
+8.0 ──┴───────────────┐ │ │
+└──────────────────┘ └───────────────
+0.0
+───┼──────────────┼──────────────────┼───────────────┼───────────────>
+Time
+0s 1.5s 5.5s 8.0s 10s
+Camera Blueprint ConfigurationType: PerspectiveCameraFocal Length / FOV:
+$45^\circ$ FOVNear Plane: $0.1$Far Plane: $1000.0$Choreography KeyframesJSON[
+{ "time": 0.0, "position": [0.0, 0.0, 8.0], "rotation": [0.0, 0.0, 0.0], "ease": "linear" },
+{ "time": 1.5, "position": [0.0, 0.0, 8.0], "rotation": [0.0, 0.0, 0.0], "ease":
+"cubic-bezier(0.16, 1, 0.3, 1)" },
+{ "time": 5.5, "position": [0.0, -2.5, 10.5], "rotation": [-0.05, 0.0, 0.0], "ease":
+"cubic-bezier(0.16, 1, 0.3, 1)" },
+{ "time": 8.0, "position": [0.0, -5.0, 9.0], "rotation": [0.0, 0.0, 0.0], "ease":
+"cubic-bezier(0.16, 1, 0.3, 1)" },
+{ "time": 10.0, "position": [0.0, -7.2, 7.5], "rotation": [0.0, 0.0, 0.0], "ease":
+"cubic-bezier(0.25, 1, 0.5, 1)" }
+
+
+=== PAGE 7 ===
+]
+8. Lighting System LIGHTING VECTOR ORIENTATION
+[Key Light]
+(5.0, 10.0, 7.0)
+│ \
+│ \ Direct Rays
+│ ▼
+[Fill Light] ───────────> [Target: Glass Mesh] <─────────── [Point Light]
+(-5.0, -2.0, 4.0) (0, 0, 0) (0.0, -1.0, 2.0)
+Soft Neutral Fill Emerald Highlights
+Physical Light ConfigurationsJSON{
+"lighting_system": {
+"ambient": { "color": "#FFFFFF", "intensity": 0.75 },
+"directional": [
+{ "id": "key_light", "color": "#FFFFFF", "intensity": 1.2, "position": [5.0, 10.0, 7.0],
+"cast_shadow": true, "shadow_bias": -0.0001 },
+{ "id": "fill_light", "color": "#D1E7DD", "intensity": 0.5, "position": [-5.0, -2.0, 4.0],
+"cast_shadow": false }
+],
+"point": [
+{ "id": "emerald_accent", "color": "#0F8259", "intensity": 0.8, "position": [0.0, -1.0,
+2.0], "distance": 10.0, "decay": 2.0 }
+]
+}
+}
+9. Material Librarymat_emerald_glass (Three.js MeshPhysicalMaterial)JavaScriptconst
+mat_emerald_glass = new THREE.MeshPhysicalMaterial({
+color: new THREE.Color("#0F8259"),
+transmission: 0.95,
+opacity: 1.0,
+transparent: true,
+roughness: 0.05,
+metalness: 0.0,
+ior: 1.52,
+thickness: 0.8,
+
+
+=== PAGE 8 ===
+attenuationColor: new THREE.Color("#0F8259"),
+attenuationDistance: 0.5,
+clearcoat: 1.0,
+clearcoatRoughness: 0.1,
+reflectivity: 0.9
+});
+mat_ui_glass_panel (CSS Material Rules)CSS.mat-ui-glass-panel {
+background: rgba(255, 255, 255, 0.25);
+backdrop-filter: blur(20px) saturate(180%);
+-webkit-backdrop-filter: blur(20px) saturate(180%);
+border: 1px solid rgba(255, 255, 255, 0.40);
+box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+10. Shader LibraryBackground Liquid Shader (shd_background)Vertex ShaderOpenGL
+Shading Languagevarying vec2 vUv;
+void main() {
+vUv = uv;
+gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+Fragment ShaderOpenGL Shading Languageuniform float uTime;
+uniform vec2 uResolution;
+uniform vec2 uMouse;
+varying vec2 vUv;
+ 
+void main() {
+vec2 st = gl_FragCoord.xy / uResolution.xy;
+vec2 mouseEffect = uMouse * 0.02;
+ 
+float wave = sin(st.x * 4.0 + uTime * 0.5 + mouseEffect.x) *
+cos(st.y * 4.0 + uTime * 0.5 + mouseEffect.y) * 0.05;
+ 
+vec3 colorStart = vec3(0.98, 0.97, 0.96); // #FAF9F5
+vec3 colorEnd = vec3(0.88, 0.87, 0.83); // #E2DFD5
+ 
+
+
+=== PAGE 9 ===
+vec3 baseColor = mix(colorStart, colorEnd, st.y + wave);
+gl_FragColor = vec4(baseColor, 1.0);
+}
+11. Animation System ANIMATION TRIGGER PIPELINE
+User Action / Scroll ───> GSAP ScrollTrigger
+│
+┌────────────────────────┴────────────────────────┐
+▼ ▼
+DOM Element Transforms WebGL Uniform Updates
+(TranslateY, Scale, Opacity) (uTime, Mesh Rotations)
+Motion RegistryJSON[
+{
+"id": "anim_shatter_implosion",
+"target": "obj_3d_x_assembly",
+"duration": 1.2,
+"ease": "cubic-bezier(0.16, 1, 0.3, 1)",
+"from": { "scale": 1.8, "opacity": 0.0, "shards_spread": 4.0 },
+"to": { "scale": 1.0, "opacity": 1.0, "shards_spread": 0.0 }
+},
+{
+"id": "anim_card_stagger_enter",
+"target": ".service-card",
+"duration": 1.0,
+"stagger": 0.15,
+"ease": "cubic-bezier(0.16, 1, 0.3, 1)",
+"from": { "translateY": "80px", "opacity": 0.0 },
+"to": { "translateY": "0px", "opacity": 1.0 }
+}
+]
+12. Master Timeline========================================
+================================================
+TIMELINE MARKERS (0.0s - 10.0s)
+====================================================
+====================================
+
+
+=== PAGE 10 ===
+[0.0s] ────────────────────────── [1.2s] ────────────────────────── [5.5s]
+─────────────>
+│ │ │
+├─ Shatter Implosion Starts ├─ Hero UI Text Reveals ├─ Services Grid Enters
+└─ Camera locked at z=8.0 └─ Camera starts drift └─ Camera Y-Pan (-2.5)
+ 
+[5.5s] ────────────────────────── [8.0s] ────────────────────────── [10.0s]
+│ │ │
+├─ Portfolio Horizontal Slide ├─ Process Node Rail Active ├─ Contact Form & Outro
+└─ Camera Y-Pan (-5.0) └─ Particles Active └─ Camera Locks (z=7.5)
+====================================================
+====================================
+13. Scroll ChoreographyComplete Scroll Percentage Mapping ($0\% - 100\%$)JSON[
+{
+"scroll_pct": "0% - 15%",
+"active_section": "Hero Section",
+"camera_target_z": 8.0,
+"dom_opacity": { "#hero-title": 1.0, "#services-grid": 0.0 },
+"webgl_states": { "x_logo_visible": true, "particle_emission": 0.0 }
+},
+{
+"scroll_pct": "16% - 40%",
+"active_section": "Services Section",
+"camera_target_z": 10.5,
+"dom_opacity": { "#hero-title": 0.0, "#services-grid": 1.0 },
+"webgl_states": { "x_logo_visible": false, "particle_emission": 0.0 }
+},
+{
+"scroll_pct": "41% - 70%",
+"active_section": "Process Node Rail Section",
+"camera_target_z": 9.0,
+"dom_opacity": { "#services-grid": 0.0, "#process-nodes": 1.0 },
+"webgl_states": { "x_logo_visible": false, "tube_rail_visible": true }
+},
+{
+
+
+=== PAGE 11 ===
+"scroll_pct": "71% - 100%",
+"active_section": "Contact Form & Footer Outro",
+"camera_target_z": 7.5,
+"dom_opacity": { "#process-nodes": 0.0, "#contact-form": 1.0, "#footer": 1.0 },
+"webgl_states": { "x_logo_visible": true, "particle_emission": 5000.0 }
+}
+]
+14. Component Librarycomp_navbarDimensions: Width $100\%$, Height
+$80\text{px}$.Layout: Flex Row, justify-content: space-between, align-items:
+center.Styles: background: rgba(235, 233, 225, 0.75), backdrop-filter:
+blur(12px).comp_glass_cardDimensions: Width $100\%$, Padding $32\text{px}$,
+Radius $16\text{px}$.CSS Class: .mat-ui-glass-panel.Hover
+Behavior:CSS.comp-glass-card {
+transition: transform 0.4s var(--ease-quartz), border-color 0.4s ease;
+}
+.comp-glass-card:hover {
+transform: translateY(-8px) scale(1.01);
+border-color: rgba(255, 255, 255, 0.80);
+}
+15. Interaction State Machines GLASS CARD INTERACTION STATE MACHINE
+[IDLE STATE] ─── mouseenter ───> [HOVER STATE] ─── mousedown ───> [PRESSED
+STATE]
+▲ │ │
+│ │ mouseleave │ mouseup
+└──────────────────────────────┴───────────────────────────────────┘
+JSON{
+"state_machine_card": {
+"idle": { "translateY": "0px", "scale": 1.0, "border_opacity": 0.4 },
+"hover": { "translateY": "-8px", "scale": 1.01, "border_opacity": 0.8 },
+"pressed": { "translateY": "-2px", "scale": 0.99, "border_opacity": 1.0 }
+}
+}
+16. Cursor SystemConfiguration BlueprintOuter Ring: Radius $20\text{px}$, Border
+$1.5\text{px}$ rgba(24,25,28,0.4), Lag Factor $\text{lerp} = 0.12$.Inner Dot: Radius
+$3\text{px}$, Color #0F8259, Lag Factor $\text{lerp} = 0.02$.JavaScript// Cursor
+Position Lerp Loop
+function renderCursor() {
+
+
+=== PAGE 12 ===
+targetX += (mouseX - targetX) * 0.12;
+targetY += (mouseY - targetY) * 0.12;
+cursorRing.style.transform = `translate3d(${targetX}px, ${targetY}px, 0)`;
+requestAnimationFrame(renderCursor);
+}
+17. Particle SystemGPUParticleSystem SpecificationCapacity: $5,000$ active
+particles.Color Range: Blend between #0F8259, #10B981, and #A7F3D0.Particle Size:
+$2.0\text{px} - 6.0\text{px}$ randomized per particle.Velocity Vector: Spiral curve
+around $Y$-axis:$$\vec{v} = \begin{pmatrix} -\sin(t) \cdot r \\ 0.5 \\ \cos(t) \cdot r
+\end{pmatrix}$$18. Responsive BlueprintBreakpoint MatrixTokenBreakpoint
+RangeGrid ColumnsTypography Scale FactorCamera Distance ZDesktop$>
+1280\text{px}$12 Columns$1.0\times$$8.0$Laptop$1024\text{px} -
+1279\text{px}$12 Columns$0.9\times$$8.5$Tablet$768\text{px} - 1023\text{px}$6
+Columns$0.8\times$$9.5$Mobile$< 767\text{px}$4 Columns$0.68\times$$11.0$19.
+AccessibilityReduced Motion: Standard fallback for users with prefers-reduced-motion:
+reduce. 3D animations are bypassed; camera movements are disabled; DOM elements
+fade in static locations.Color Contrast: All body text meets WCAG AAA standards ($>
+7:1$ contrast ratio against light backdrop).Keyboard Navigation: All interactive cards
+and buttons expose visible focus rings (2px solid #0F8259).20. Performance Budget
+GPU FRAME TIME BUDGET (16.6ms Target)
+┌─────────────────────────┬─────────────────────────┬───────────────────
+──────┐
+│ WebGL Render (6.0ms) │ GLSL Post-Process(4.5ms)│ DOM Composite (3.0ms) │
+└─────────────────────────┴─────────────────────────┴───────────────────
+──────┘
+[==================================== 13.5ms
+==================================>]
+[Margin: 3.1ms]
+Quantitative ConstraintsTarget FPS: 60 FPS constant.Maximum Triangle Count: $<
+50,000$ active triangles per frame.Maximum Draw Calls: $< 35$ draw calls per
+frame.Texture Memory Limit: $< 64\text{MB}$.21. Implementation BlueprintFile
+Architecture Plansrc/
+├── app/
+│ ├── layout.tsx
+│ └── page.tsx
+├── components/
+│ ├── dom/
+│ │ ├── Navbar.tsx
+│ │ ├── Hero.tsx
+│ │ ├── ServicesGrid.tsx
+
+
+=== PAGE 13 ===
+│ │ └── ContactForm.tsx
+│ └── canvas/
+│ ├── SceneCanvas.tsx
+│ ├── GlassXMesh.tsx
+│ ├── ProcessRail.tsx
+│ └── ParticleSystem.tsx
+├── shaders/
+│ ├── background.fragment.glsl
+│ └── glass.fragment.glsl
+└── styles/
+└── globals.css
+22. QA Checklist[ ] Visual Accuracy: Background color matches #EBE9E1 across DOM
+and WebGL canvas elements.[ ] Refraction Pass Verification: Emerald glass ($IOR =
+1.52$) renders visible refraction offset against background text.[ ] Frame Rate
+Validation: Test maintaining stable 60 FPS performance under 4K resolution displays.[ ]
+Scroll Synchronization: Verify GSAP ScrollTrigger timeline pins correctly without jitter
+across all breakpoints.Single Source of Truth SignatureDocument Version:
+2.2.0-MASTER-FINALStatus: Approved for ImplementationTarget Stack: Next.js + React
+Three Fiber + GSAP + TailwindCSS
+
+

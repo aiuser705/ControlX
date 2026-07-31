@@ -1,0 +1,286 @@
+{
+  "project": {
+    "title": "ControlX Landing Page & 3D Glass Experience",
+    "version": "1.0.0",
+    "frame_rate": 60,
+    "aspect_ratio": "16:9",
+    "theme": "Luxurious Glassmorphism / Modern 3D Interactive UI"
+  },
+  "camera": {
+    "type": "PerspectiveCamera",
+    "fov": 45,
+    "near": 0.1,
+    "far": 1000,
+    "initial_position": { "x": 0, "y": 0, "z": 8 },
+    "target": { "x": 0, "y": 0, "z": 0 }
+  },
+  "timeline": [
+    {
+      "time_start": "00:00:00",
+      "time_end": "00:00:01",
+      "section": "3D Intro Assembly",
+      "camera_motion": "Static front-facing camera with subtle z-depth focus.",
+      "background": "Warm off-white neutral Studio backdrop with floor shadows.",
+      "foreground": "Floating glass shards forming the main central emerald 'X'.",
+      "objects": "Glass 'X' shattered fragments, floating air particles/water droplets.",
+      "text": "None",
+      "animation_sequence": [
+        "Shattered green glass fragments implode toward center",
+        "Fragments align perfectly to form solid 3D 'X' logo",
+        "Water droplets hover and drift in background"
+      ],
+      "transition": "Continuous motion into UI overlay",
+      "lighting": "Soft directional light with subtle chromatic ambient occlusion",
+      "colors": "Base: #EBE9E1, Accent Glass: #0F8259",
+      "materials": "Physical Glass: Transmission 0.95, Roughness 0.1, IOR 1.52",
+      "hover_effects": "None",
+      "scroll_behavior": "Locked during intro",
+      "gsap_equivalent": "gsap.to(shards.position, { duration: 1.0, x: 0, y: 0, z: 0, ease: 'power3.inOut' })",
+      "threejs_equivalent": "InstancedMesh position interpolation to target transform matrix",
+      "css_equivalent": "transform: translate3d(0,0,0) scale(1); opacity: 1; transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);",
+      "notes": "Seamless assembly transition leading into hero header reveal."
+    },
+    {
+      "time_start": "00:00:01",
+      "time_end": "00:00:03",
+      "section": "Hero UI Reveal",
+      "camera_motion": "Camera pulls back slightly on Z axis (z: 8 -> z: 10).",
+      "background": "Silky fluid glass wave surface overlay with subtle refraction.",
+      "foreground": "Navbar, Hero Typography, Call to Action Buttons.",
+      "objects": "Floating central glass 'X', cursor element.",
+      "text": "CONTROL X, PRENIUM | AGENCY, Prensiuny chartiment eveaqual..., Read Review",
+      "animation_sequence": [
+        "Header UI fades in with y-offset slide down",
+        "Hero headline text cascades in via line mask reveal",
+        "Glass 'X' floats smoothly at center-right of frame",
+        "Cursor tracks across screen, triggering button hover state"
+      ],
+      "transition": "Vertical scroll transition downward",
+      "lighting": "Key spotlight top-left, fill rim light right",
+      "colors": "Primary Text: #1C1C1C, Secondary Text: #666666, Glass Accent: #10B981",
+      "materials": "Frosted glass UI elements with backdrop-filter blur(20px)",
+      "hover_effects": "Primary button scales 1.05 with green background glow",
+      "scroll_behavior": "Parallax shift on 3D X mesh vs DOM text content",
+      "gsap_equivalent": "gsap.from('.hero-text', { y: 40, opacity: 0, duration: 0.8, stagger: 0.1, ease: 'power2.out' })",
+      "threejs_equivalent": "Mesh floating sine wave animation: mesh.position.y += Math.sin(time) * 0.005",
+      "css_equivalent": "@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }",
+      "notes": "High aesthetic fluid motion behind clean modern typography."
+    },
+    {
+      "time_start": "00:00:04",
+      "time_end": "00:00:06",
+      "section": "Services Grid Section",
+      "camera_motion": "Smooth vertical pan down (y: 0 -> y: -12).",
+      "background": "Distorted silk distortion liquid background with refraction map.",
+      "foreground": "Services Header, 3x2 Glass Card Grid.",
+      "objects": "Glass cards, line icons, CTA text.",
+      "text": "Services, Seltubic Develops, Nature Interratioc, Completing Services, Botal Devices, Mesolty Desinge, Punic Citama",
+      "animation_sequence": [
+        "Hero section translates upward off-screen",
+        "Services title reveals from left mask",
+        "Cards stagger-fade in with subtle tilt rotation on Y axis",
+        "Top-row glass cards reflect light as camera pans"
+      ],
+      "transition": "Continuous scroll down to Portfolio slider",
+      "lighting": "Environmental HDR lighting with high specular highlights on glass edges",
+      "colors": "Card BG: rgba(255, 255, 255, 0.25), Border: rgba(255, 255, 255, 0.4)",
+      "materials": "Backdrop-filter blur(16px), border 1px solid rgba(255,255,255,0.3)",
+      "hover_effects": "Card elevation (translateY -8px) and border opacity increase",
+      "scroll_behavior": "Smooth inertia scroll with GSAP ScrollTrigger",
+      "gsap_equivalent": "gsap.from('.service-card', { scrollTrigger: '.services', y: 60, opacity: 0, stagger: 0.15, duration: 1 })",
+      "threejs_equivalent": "PlaneGeometry specular highlight shader uniform update on scroll",
+      "css_equivalent": "backdrop-filter: blur(16px); background: rgba(255,255,255,0.2); border-radius: 16px;",
+      "notes": "Symmetrical 3-column card grid with ultra-clean glass refraction."
+    },
+    {
+      "time_start": "00:00:07",
+      "time_end": "00:00:09",
+      "section": "Portfolio Carousel & Footer Outro",
+      "camera_motion": "Pan down to horizontal slider, then transition to final frame center focus.",
+      "background": "Studio lighting floor background returning to central 3D logo state.",
+      "foreground": "Horizontal Portfolio Slider with giant step numbers (01, 02, 03), Footer 'CONTROL X' branding.",
+      "objects": "Interactive horizontal carousel, floating glass 'X' logo, floor reflections.",
+      "text": "01, 02, 03, CONTROL X - Your Vision x Our Expertise",
+      "animation_sequence": [
+        "Horizontal portfolio cards slide smoothly from right to left",
+        "Big green index numbers (01, 02, 03) parallax behind cards",
+        "Page settles on final footer view featuring central 3D 'X' logo and taglines",
+        "Shimmer particles float around central glass emblem"
+      ],
+      "transition": "End frame hold",
+      "lighting": "Focused spotlight on central 3D 'X', soft ambient floor cast",
+      "colors": "Primary: #0F8259, Neutral Dark: #1A1A1A, Studio Floor: #EBE9E1",
+      "materials": "High refractivity glass 'X' mesh, matte studio ground floor",
+      "hover_effects": "Slider cards expand slightly on drag/hover",
+      "scroll_behavior": "Horizontal section pinning before final snap to footer",
+      "gsap_equivalent": "gsap.to('.portfolio-container', { xPercent: -100, ease: 'none', scrollTrigger: { trigger: '.portfolio', pin: true, scrub: 1 } })",
+      "threejs_equivalent": "Mesh rotation: logoMesh.rotation.y = Math.sin(time * 0.5) * 0.2",
+      "css_equivalent": "transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);",
+      "notes": "Branded finale tying together 3D asset interaction and modern web design."
+    }
+  ],
+  "sections": [
+    { "id": "intro_3d", "type": "WebGL Canvas Canvas Scene" },
+    { "id": "hero", "type": "Hero Landing UI" },
+    { "id": "services", "type": "3x2 Responsive Glass Grid" },
+    { "id": "portfolio", "type": "Pinned Horizontal Motion Slider" },
+    { "id": "footer", "type": "Brand Outro & Focal 3D Logo" }
+  ],
+  "background": {
+    "type": "Hybrid Canvas Shader + DOM Background",
+    "primary_color": "#EBE9E1",
+    "gradient": "radial-gradient(circle at 50% 30%, #F5F4EE 0%, #E2DFD5 100%)",
+    "noise_texture": { "opacity": 0.03, "scale": 1.0 },
+    "fluid_distortion": { "enabled": true, "speed": 0.2, "viscosity": 0.8 }
+  },
+  "lighting": {
+    "ambient_light": { "color": "#FFFFFF", "intensity": 0.6 },
+    "directional_light": { "color": "#FFFFFF", "intensity": 1.2, "position": [5, 10, 7] },
+    "point_light": { "color": "#10B981", "intensity": 0.8, "position": [0, -2, 3] }
+  },
+  "typography": {
+    "font_family_primary": "'Plus Jakarta Sans', sans-serif",
+    "font_family_secondary": "'Cinzel', 'Playfair Display', serif",
+    "headings": { "weight": 600, "letter_spacing": "-0.02em", "line_height": 1.15 },
+    "body": { "weight": 400, "size": "16px", "line_height": 1.6, "color": "#555555" }
+  },
+  "colors": {
+    "background": "#EBE9E1",
+    "text_dark": "#18191C",
+    "text_muted": "#686D76",
+    "emerald_accent": "#0F8259",
+    "glass_border": "rgba(255, 255, 255, 0.4)",
+    "glass_bg": "rgba(255, 255, 255, 0.2)"
+  },
+  "glass_materials": {
+    "hero_x_emerald": {
+      "color": "#0F8259",
+      "transmission": 0.92,
+      "roughness": 0.08,
+      "ior": 1.52,
+      "thickness": 0.8,
+      "chromatic_aberration": 0.04
+    },
+    "ui_cards": {
+      "backdrop_filter_blur": "20px",
+      "background_color": "rgba(255, 255, 255, 0.25)",
+      "border": "1px solid rgba(255, 255, 255, 0.4)",
+      "box_shadow": "0 20px 40px rgba(0, 0, 0, 0.04)"
+    }
+  },
+  "animations": [
+    {
+      "animation_name": "Shatter Assembly",
+      "duration": 1.2,
+      "delay": 0.0,
+      "ease": "power3.inOut",
+      "direction": "Implode to center",
+      "opacity": { "from": 0, "to": 1 },
+      "scale": { "from": 1.5, "to": 1.0 },
+      "rotation": { "from": "45deg", "to": "0deg" },
+      "position": { "from": "spread random", "to": "0,0,0" },
+      "blur": { "from": "10px", "to": "0px" },
+      "mask_reveal": false,
+      "clip_path": "none",
+      "parallax": false,
+      "spring": { "stiffness": 100, "damping": 15 },
+      "elastic": 0,
+      "scroll_trigger": false,
+      "mouse_trigger": false,
+      "idle_motion": "Floating floating float animation",
+      "hover_motion": "Subtle rotation on tilt"
+    },
+    {
+      "animation_name": "Hero Text Reveal",
+      "duration": 0.8,
+      "delay": 0.3,
+      "ease": "power2.out",
+      "direction": "Upward slide",
+      "opacity": { "from": 0, "to": 1 },
+      "scale": { "from": 1.0, "to": 1.0 },
+      "rotation": { "from": "0deg", "to": "0deg" },
+      "position": { "from": "0, 40px, 0", "to": "0, 0, 0" },
+      "blur": { "from": "4px", "to": "0px" },
+      "mask_reveal": true,
+      "clip_path": "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
+      "parallax": true,
+      "spring": null,
+      "elastic": 0,
+      "scroll_trigger": false,
+      "mouse_trigger": false,
+      "idle_motion": "None",
+      "hover_motion": "None"
+    }
+  ],
+  "micro_interactions": [
+    {
+      "target": ".btn-primary",
+      "trigger": "hover",
+      "effect": "Background scale 1.05, arrow shifts 4px right, light sheen sweep across glass face"
+    },
+    {
+      "target": ".service-card",
+      "trigger": "hover",
+      "effect": "Card translates Y -6px, glass border brightens to #FFFFFF, glass blur increases to 24px"
+    }
+  ],
+  "cursor": {
+    "type": "Custom SVG / Canvas Follower",
+    "size": "24px",
+    "color": "rgba(24, 25, 28, 0.8)",
+    "blend_mode": "difference",
+    "lag_factor": 0.15
+  },
+  "scroll_behavior": {
+    "type": "Smooth Inertia Scroll",
+    "plugin": "Lenis / GSAP ScrollSmoother",
+    "lerp": 0.08,
+    "smooth_touch": true
+  },
+  "components": [
+    { "name": "Navbar", "position": "Fixed top", "height": "80px" },
+    { "name": "Hero Section", "height": "100vh" },
+    { "name": "Services Grid", "layout": "3 Columns x 2 Rows" },
+    { "name": "Portfolio Slider", "layout": "Pinned Horizontal Scroll Track" },
+    { "name": "Footer Section", "height": "60vh" }
+  ],
+  "layout": {
+    "max_width": "1280px",
+    "grid_columns": 12,
+    "gutter": "24px",
+    "margin": "auto"
+  },
+  "spacing": {
+    "section_padding_y": "120px",
+    "card_padding": "32px",
+    "element_gap": "16px"
+  },
+  "depth": {
+    "z_index": {
+      "background_canvas": 0,
+      "content_ui": 10,
+      "navbar": 100,
+      "cursor": 999
+    }
+  },
+  "effects": {
+    "bloom": { "enabled": true, "threshold": 0.85, "strength": 0.4 },
+    "chromatic_aberration": { "enabled": true, "offset": 0.002 },
+    "vignette": { "enabled": true, "darkness": 0.15 }
+  },
+  "motion": {
+    "default_ease": "cubic-bezier(0.16, 1, 0.3, 1)",
+    "fast_duration": "0.3s",
+    "medium_duration": "0.6s",
+    "slow_duration": "1.2s"
+  },
+  "performance_notes": {
+    "threejs_optimization": "Use InstancedMesh for floating droplets; keep glass fragment polygon count under 50k tris total.",
+    "css_optimization": "Apply will-change: transform, opacity to animated cards and buttons.",
+    "post_processing": "Disable Bloom and Chromatic Aberration on mobile viewports (<768px) for 60fps target."
+  },
+  "implementation_notes": {
+    "framework_recommendation": "Next.js + Three.js (React Three Fiber) + GSAP ScrollTrigger + TailwindCSS",
+    "shader_pipeline": "MeshPhysicalMaterial for real-time emerald refraction; Custom WebGL render pass for glass wave background."
+  }
+}
