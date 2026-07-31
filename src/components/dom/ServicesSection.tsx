@@ -158,7 +158,7 @@ export default function ServicesSection() {
           {SERVICES_DATA.map((service, idx) => (
             <div
               key={service.id}
-              ref={(el) => (cardsRef.current[idx] = el)}
+              ref={(el) => { cardsRef.current[idx] = el; }}
               className="service-card glass-card"
               onMouseMove={(e) => handleMouseMove(e, idx)}
               onMouseLeave={() => handleMouseLeave(idx)}
