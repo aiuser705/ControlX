@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Layout, PenTool, Code2, Sparkles, Gauge, Handshake } from 'lucide-react';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -11,73 +12,39 @@ if (typeof window !== 'undefined') {
 const SERVICES_DATA = [
   {
     id: '01',
-    title: 'Seltubic Develops',
-    desc: 'Cerant olauc cvepote umaltrinite dectutates, and diret antit who defenllping atamainess.',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 28C12 28 16 12 28 12C28 12 24 28 12 28Z" stroke="#0F8259" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M18 22C18 22 22 14 30 14" stroke="#0F8259" strokeWidth="2" strokeLinecap="round"/>
-        <circle cx="28" cy="10" r="2" fill="#0F8259"/>
-      </svg>
-    ),
+    title: 'Premium Landing Pages',
+    desc: 'Beautiful, conversion-focused landing pages designed to capture attention, communicate value, and turn visitors into customers.',
+    icon: <Layout size={36} strokeWidth={1.8} color="#0F8259" />,
   },
   {
     id: '02',
-    title: 'Nature Interratioc',
-    desc: 'Commodity and deherancy and accritilating resfiuctives charsingis, deloite & consfectors.',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="10" y="14" width="20" height="14" rx="2" stroke="#0F8259" strokeWidth="2.2"/>
-        <path d="M8 28H32" stroke="#0F8259" strokeWidth="2.2" strokeLinecap="round"/>
-        <path d="M16 14V10H24V14" stroke="#0F8259" strokeWidth="1.8"/>
-      </svg>
-    ),
+    title: 'UI / UX Design',
+    desc: 'Thoughtfully designed interfaces that combine usability, clarity, and premium aesthetics across every screen.',
+    icon: <PenTool size={36} strokeWidth={1.8} color="#0F8259" />,
   },
   {
     id: '03',
-    title: 'Completing Services',
-    desc: 'Domnicos ad accare eorind nexun, inferciar, fast leirees smiitn, datolaciar mreaforters.',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="10" y="18" width="8" height="14" stroke="#0F8259" strokeWidth="2"/>
-        <rect x="22" y="10" width="8" height="22" stroke="#0F8259" strokeWidth="2"/>
-        <path d="M14 18V12L22 8" stroke="#0F8259" strokeWidth="1.8" strokeLinecap="round"/>
-      </svg>
-    ),
+    title: 'Frontend Development',
+    desc: 'Pixel-perfect websites built with React, Next.js and TypeScript for speed, scalability, and long-term maintainability.',
+    icon: <Code2 size={36} strokeWidth={1.8} color="#0F8259" />,
   },
   {
     id: '04',
-    title: 'Botal Devices',
-    desc: 'Lorem ipsum all ealing tasts izari and advanced optical device integration platforms.',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="20" cy="20" r="10" stroke="#0F8259" strokeWidth="2.2"/>
-        <circle cx="20" cy="20" r="4" fill="#0F8259"/>
-        <path d="M20 6V10M20 30V34M6 20H10M30 20H34" stroke="#0F8259" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-    ),
+    title: 'Motion & Interactions',
+    desc: 'Luxury animations powered by GSAP and Three.js that make every interaction smooth, immersive and memorable.',
+    icon: <Sparkles size={36} strokeWidth={1.8} color="#0F8259" />,
   },
   {
     id: '05',
-    title: 'Mesolty Desinge',
-    desc: 'Dusteiphanss melay eirastade with high-end spatial geometry & liquid surface dynamics.',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M10 28L20 10L30 28H10Z" stroke="#0F8259" strokeWidth="2.2" strokeLinejoin="round"/>
-        <circle cx="20" cy="20" r="3" fill="#0F8259"/>
-      </svg>
-    ),
+    title: 'Performance & SEO',
+    desc: 'Optimized for Core Web Vitals, accessibility, search visibility and lightning-fast performance on every device.',
+    icon: <Gauge size={36} strokeWidth={1.8} color="#0F8259" />,
   },
   {
     id: '06',
-    title: 'Punic Citama',
-    desc: 'Spreem ipsum fmoronsgund arfood for luxury digital interactive installations.',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="10" y="10" width="20" height="20" rx="4" stroke="#0F8259" strokeWidth="2"/>
-        <path d="M10 18H30M18 10V30" stroke="#0F8259" strokeWidth="1.8"/>
-      </svg>
-    ),
+    title: 'Support & Growth',
+    desc: 'Continuous maintenance, feature enhancements and long-term support to help your digital presence evolve with your business.',
+    icon: <Handshake size={36} strokeWidth={1.8} color="#0F8259" />,
   },
 ];
 
@@ -151,7 +118,10 @@ export default function ServicesSection() {
       <div className="services-container">
         <div className="services-header">
           <p className="services-tagline">OUR EXPERTISE</p>
-          <h2 className="services-title">Services</h2>
+          <h2 className="services-title">What We Build</h2>
+          <p style={{ marginTop: '16px', fontSize: '16px', color: 'var(--c-text-muted)', maxWidth: '720px', lineHeight: '1.6' }}>
+            From strategy and design to development and long-term support, we craft premium digital experiences that help modern brands stand out online.
+          </p>
         </div>
 
         <div className="services-grid">
@@ -167,7 +137,7 @@ export default function ServicesSection() {
               <h3 className="service-card__title">{service.title}</h3>
               <p className="service-card__desc">{service.desc}</p>
               <button className="service-card__btn" type="button">
-                Read more
+                Explore Service
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>

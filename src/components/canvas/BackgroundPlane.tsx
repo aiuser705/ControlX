@@ -53,7 +53,7 @@ export function BackgroundPlane() {
       uVelocity: { value: new THREE.Vector2(0, 0) },
       uVideoTexture: { value: videoTexture },
     }),
-    [videoTexture]
+    [videoTexture, size.width, size.height]
   );
 
   useEffect(() => {
