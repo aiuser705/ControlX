@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import Navigation from '@/components/dom/Navigation';
 import HeroSection from '@/components/dom/HeroSection';
+import BrandStorySection from '@/components/dom/BrandStorySection';
 import ServicesSection from '@/components/dom/ServicesSection';
 import ProcessSection from '@/components/dom/ProcessSection';
 import PortfolioSection from '@/components/dom/PortfolioSection';
@@ -118,6 +119,7 @@ export default function Home() {
       >
         <Navigation />
         <HeroSection />
+        <BrandStorySection />
         <ServicesSection />
         <ProcessSection />
         <PortfolioSection />
