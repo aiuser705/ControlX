@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 export type CatState =
   | 'idle'
@@ -22,54 +21,61 @@ const CAT_ASSETS: Record<CatState, string> = {
 
 interface CatMascotProps {
   state: CatState;
+  showDebugLabel?: boolean;
 }
 
-export default function CatMascot({ state }: CatMascotProps) {
+export default function CatMascot({ state, showDebugLabel = false }: CatMascotProps) {
   const currentAsset = CAT_ASSETS[state] || CAT_ASSETS['idle'];
 
   return (
     <div
       aria-label={`Control X mascot — ${state}`}
-      className="relative w-[250px] h-[190px] flex items-end justify-center pointer-events-none select-none"
+      className="relative w-[320px] h-[240px] flex items-end justify-center pointer-events-none select-none overflow-visible"
     >
-      <AnimatePresence mode="popLayout">
-        <motion.div
-          key={state}
-          initial={{ opacity: 0, y: 6, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -4, scale: 0.97 }}
-          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute inset-0 w-full h-full flex items-end justify-center"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={currentAsset}
-            alt={`Control X cat mascot — ${state}`}
-            className="w-full h-full object-contain filter drop-shadow-[0_10px_22px_rgba(15,130,89,0.18)]"
-            style={{
-              // If idle state, apply gentle subtle breathing pulse
-              animation: state === 'idle' ? 'catBreathing 3s ease-in-out infinite' : undefined,
-            }}
-          />
-        </motion.div>
-      </AnimatePresence>
+      {/*
+        EXACTLY ONE IMAGE ELEMENT AT ALL TIMES.
+        Zero AnimatePresence / zero dual mounting to guarantee NO double cat, NO ghost paws, NO extra layers.
+        All 6 PNG assets share the exact same normalized 480x360 canvas & paw baseline (Y=320),
+        so swapping src updates expression in the exact same physical slot.
+      */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        key={state}
+        src={currentAsset}
+        alt={`Control X cat mascot — ${state}`}
+        className="w-full h-full object-contain filter drop-shadow-[0_8px_20px_rgba(15,130,89,0.15)]"
+        style={{
+          animation: state === 'idle'
+            ? 'catBreathing 3s ease-in-out infinite'
+            : 'catStateSwap 0.22s ease-out forwards',
+        }}
+      />
 
-      {/* Success sparkles overlay when state is success */}
-      {state === 'success' && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="absolute -top-4 inset-x-0 flex justify-center gap-4 pointer-events-none"
-        >
-          <span className="animate-ping w-2 h-2 rounded-full bg-emerald-400 opacity-75" />
-          <span className="animate-pulse w-3 h-3 rounded-full bg-emerald-300 opacity-80" />
-        </motion.div>
+      {/* Temporary Debug Indicator */}
+      {showDebugLabel && (
+        <div className="absolute top-1 left-1 bg-slate-900/90 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-mono shadow border border-emerald-500/30 z-30 pointer-events-none">
+          State: {state}
+        </div>
       )}
 
       <style jsx global>{`
+        @keyframes catStateSwap {
+          0% {
+            opacity: 0.88;
+            transform: translateY(2px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0px);
+          }
+        }
         @keyframes catBreathing {
-          0%, 100% { transform: translateY(0px); }
-          50%      { transform: translateY(-3px); }
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-2.5px);
+          }
         }
       `}</style>
     </div>

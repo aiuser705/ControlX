@@ -102,14 +102,14 @@ export default function LoginCard() {
       setErrorMsg('Please enter a valid email address.');
       setCatState('error');
       shakeCard();
-      setTimeout(() => setCatState(returnStateRef.current), 2000);
+      setTimeout(() => setCatState(returnStateRef.current), 2200);
       return;
     }
     if (!password || password.length < 1) {
       setErrorMsg('Password is required.');
       setCatState('error');
       shakeCard();
-      setTimeout(() => setCatState(returnStateRef.current), 2000);
+      setTimeout(() => setCatState(returnStateRef.current), 2200);
       return;
     }
 
@@ -152,21 +152,21 @@ export default function LoginCard() {
       ref={wrapperRef}
       className="relative w-full max-w-[460px] overflow-visible"
     >
-      {/* ── CAT MASCOT STAGE ───────────────────────────────────────────────
+      {/* ── FIXED CHARACTER STAGE SLOT ─────────────────────────────────────
           Anchored to the top-center of the login card.
-          Paws sit and overlap naturally on the card's top border.
+          Cat paws sit and overlap naturally on the card's top border.
       ─────────────────────────────────────────────────────────────────── */}
       <div
         aria-hidden="true"
-        className="absolute left-1/2 -translate-x-1/2 -top-[145px] z-20 pointer-events-none"
+        className="absolute left-1/2 -translate-x-1/2 -top-[172px] z-20 pointer-events-none"
       >
-        <CatMascot state={catState} />
+        <CatMascot state={catState} showDebugLabel={false} />
       </div>
 
       {/* ── FROSTED GLASS LOGIN CARD ─────────────────────────────────────── */}
       <div
         ref={cardRef}
-        className="login-card-master relative z-10 w-full rounded-[28px] p-8 md:p-10 pt-16 md:pt-20 overflow-hidden"
+        className="login-card-master relative z-10 w-full rounded-[28px] p-8 md:p-10 pt-14 md:pt-16 overflow-hidden"
       >
         {/* Specular glass reflection */}
         <div className="bs-glass-reflection" aria-hidden="true" />
