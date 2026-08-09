@@ -564,6 +564,7 @@ body {
   margin-bottom: 12px;
   color: var(--c-text);
 }
+
 /* ═══════════════════════════════════════════════════════════════════
    CONTROL X BRAND STORY SECTION — MASTER VISUAL SPECIFICATION
    Apple Vision Pro Light Frosted Acrylic Glass Theme (#E8E2D6 / Champagne)
@@ -645,6 +646,7 @@ body {
   .bs-main-row {
     grid-template-columns: 1fr 1fr;
   }
+
   .bs-center-arena {
     grid-column: span 2;
     order: -1;
@@ -656,6 +658,7 @@ body {
   .bs-main-row {
     grid-template-columns: 1fr;
   }
+
   .bs-center-arena {
     grid-column: span 1;
     min-height: 380px;
@@ -696,6 +699,7 @@ body {
   justify-content: space-between;
   margin-bottom: 20px;
 }
+
 .bs-panel-header--right {
   justify-content: flex-end;
 }
@@ -726,15 +730,6 @@ body {
   align-items: center;
   gap: 12px;
   margin-bottom: 14px;
-}
-
-.bs-title-group--center {
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .bs-panel-title {
@@ -769,10 +764,6 @@ body {
   line-height: 1.68;
   color: var(--c-text-muted);
   margin-bottom: 24px;
-}
-
-.bs-panel-desc--center {
-  text-align: center;
 }
 
 /* ── 3 Luxury Feature Modules (Left Panel) ───────────────────────── */
@@ -934,10 +925,25 @@ body {
   transform: scale(1.14);
 }
 
-.bs-node--top-left { top: 12%; left: 8%; }
-.bs-node--bottom-left { bottom: 12%; left: 8%; }
-.bs-node--top-right { top: 12%; right: 8%; }
-.bs-node--bottom-right { bottom: 12%; right: 8%; }
+.bs-node--top-left {
+  top: 12%;
+  left: 8%;
+}
+
+.bs-node--bottom-left {
+  bottom: 12%;
+  left: 8%;
+}
+
+.bs-node--top-right {
+  top: 12%;
+  right: 8%;
+}
+
+.bs-node--bottom-right {
+  bottom: 12%;
+  right: 8%;
+}
 
 .bs-node-circle {
   width: 48px;
@@ -1098,10 +1104,23 @@ body {
 }
 
 @keyframes lineMote {
-  0% { left: 0%; opacity: 0; }
-  20% { opacity: 1; }
-  80% { opacity: 1; }
-  100% { left: 100%; opacity: 0; }
+  0% {
+    left: 0%;
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
 }
 
 .bs-promise-bar {
@@ -1156,6 +1175,7 @@ body {
   align-items: center;
   justify-content: center;
 }
+
 .bs-eq-icon-badge--green {
   background: rgba(15, 130, 89, 0.18);
 }
@@ -1171,6 +1191,7 @@ body {
   font-size: 13.5px;
   font-weight: 700;
 }
+
 .bs-cap-title--result {
   font-family: var(--font-serif);
   font-style: italic;
@@ -1291,6 +1312,7 @@ body {
   line-height: 1.55;
   color: var(--c-text-muted);
 }
+
 .service-card__desc {
   font-family: var(--font-sans);
   font-size: 15px;
@@ -2560,11 +2582,11 @@ body {
    Translucent Warm Ivory Glassmorphism Card
 ═══════════════════════════════════════════════════════════════════ */
 
-.login-glass-card {
-  background: rgba(236, 231, 220, 0.76);
-  backdrop-filter: blur(36px) saturate(190%);
-  -webkit-backdrop-filter: blur(36px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+.login-card-master {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow:
     0 24px 60px rgba(0, 0, 0, 0.06),
     0 4px 16px rgba(15, 130, 89, 0.08),
@@ -2573,19 +2595,10 @@ body {
   transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
 }
 
-.login-glass-card:hover {
+.login-card-master:hover {
   border-color: rgba(255, 255, 255, 1);
   box-shadow:
     0 32px 70px rgba(0, 0, 0, 0.08),
     0 6px 24px rgba(15, 130, 89, 0.12),
     inset 0 1.5px 0 #FFFFFF;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease forwards;
 }

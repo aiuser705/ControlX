@@ -12,12 +12,6 @@ import {
   Briefcase,
   Star,
   ArrowRight,
-  Gem,
-  Zap,
-  Users,
-  Clock,
-  Handshake,
-  Layers,
 } from 'lucide-react';
 
 if (typeof window !== 'undefined') {
@@ -56,47 +50,15 @@ const NODES = [
   { id: 'vision', label: 'YOUR VISION', icon: Star, pos: 'bottom-right' },
 ];
 
-const WHY_CHOOSE_ITEMS = [
-  {
-    icon: Gem,
-    title: 'Strategic By Design',
-    desc: 'We combine strategy and creativity to build digital experiences that perform.',
-  },
-  {
-    icon: Zap,
-    title: 'Scalable & Future-Ready',
-    desc: 'We use modern technologies and best practices to ensure your brand is future-proof.',
-  },
-  {
-    icon: Users,
-    title: 'Client-Centric',
-    desc: 'Your goals drive every decision. You stay in control at every step of the journey.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Quality Without Compromise',
-    desc: 'Clean code, thoughtful design, and rigorous testing — every time.',
-  },
-  {
-    icon: Clock,
-    title: 'Timely Delivery',
-    desc: 'We respect your time and consistently deliver on schedule.',
-  },
-  {
-    icon: Handshake,
-    title: 'Long-Term Partner',
-    desc: "We don't just launch projects. We build relationships that create lasting value.",
-  },
-];
-
 export default function BrandStorySection() {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  
+  const svgRef = useRef<SVGSVGElement>(null);
+
   const [hoveredNode, setHoveredNode] = useState<number | null>(null);
   const [pulseX, setPulseX] = useState(false);
 
-  // ── Canvas: 3D Crystal X + 6 Concentric Orbit Rings + Floating Dust Particles ──
+  // ── Canvas: 3D Crystal X + Concentric Orbit Rings + Floating Dust Motes ──
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -115,8 +77,8 @@ export default function BrandStorySection() {
     const ro = new ResizeObserver(resize);
     if (canvas.parentElement) ro.observe(canvas.parentElement);
 
-    // Floating light motes
-    const particles = Array.from({ length: 32 }, () => ({
+    // Floating particles
+    const particles = Array.from({ length: 35 }, () => ({
       x: Math.random() * 500,
       y: Math.random() * 500,
       r: Math.random() * 1.8 + 0.4,
@@ -138,20 +100,18 @@ export default function BrandStorySection() {
       ctx.clearRect(0, 0, W, H);
 
       // Soft ambient radial backlight
-      const bgGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 220);
-      bgGlow.addColorStop(0, 'rgba(15, 130, 89, 0.15)');
+      const bgGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 210);
+      bgGlow.addColorStop(0, 'rgba(15, 130, 89, 0.14)');
       bgGlow.addColorStop(0.5, 'rgba(15, 130, 89, 0.03)');
       bgGlow.addColorStop(1, 'transparent');
       ctx.fillStyle = bgGlow;
       ctx.fillRect(0, 0, W, H);
 
-      // 5 Concentric Orbital Rings
+      // Concentric Orbit Rings
       const rings = [
-        { r: 55, spd: 0.4, dash: [3, 3], alpha: 0.35 },
-        { r: 85, spd: -0.28, dash: [4, 6], alpha: 0.25 },
-        { r: 120, spd: 0.18, dash: [6, 8], alpha: 0.18 },
-        { r: 155, spd: -0.12, dash: [3, 9], alpha: 0.14 },
-        { r: 190, spd: 0.08, dash: [8, 12], alpha: 0.08 },
+        { r: 70, spd: 0.35, dash: [4, 4], alpha: 0.3 },
+        { r: 115, spd: -0.22, dash: [6, 8], alpha: 0.18 },
+        { r: 160, spd: 0.14, dash: [3, 9], alpha: 0.12 },
       ];
 
       rings.forEach(({ r, spd, dash, alpha }) => {
@@ -161,7 +121,7 @@ export default function BrandStorySection() {
         ctx.beginPath();
         ctx.arc(0, 0, r, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(15, 130, 89, ${alpha})`;
-        ctx.lineWidth = 1.1;
+        ctx.lineWidth = 1.2;
         ctx.setLineDash(dash);
         ctx.stroke();
 
@@ -194,7 +154,7 @@ export default function BrandStorySection() {
       });
 
       // Center 3D Crystal X (with slow breathing)
-      const scaleBreathe = 1 + Math.sin(t * 1.2) * 0.025;
+      const scaleBreathe = 1 + Math.sin(t * 1.2) * 0.03;
       const xSize = Math.min(W, H) * 0.42;
 
       ctx.save();
@@ -203,8 +163,8 @@ export default function BrandStorySection() {
 
       // Deep volumetric shadow under X
       const xGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, xSize * 0.7);
-      xGlow.addColorStop(0, 'rgba(15, 130, 89, 0.28)');
-      xGlow.addColorStop(0.5, 'rgba(15, 130, 89, 0.08)');
+      xGlow.addColorStop(0, 'rgba(15, 130, 89, 0.25)');
+      xGlow.addColorStop(0.5, 'rgba(15, 130, 89, 0.06)');
       xGlow.addColorStop(1, 'transparent');
       ctx.fillStyle = xGlow;
       ctx.fillRect(-xSize, -xSize, xSize * 2, xSize * 2);
@@ -262,10 +222,10 @@ export default function BrandStorySection() {
         { opacity: 1, y: 0, duration: 1, ease: 'expo.out', delay: 0.1, scrollTrigger: { trigger: '.bs-header-headline', start: 'top 85%' } }
       );
 
-      // 2. Panels reveal
+      // 2. Left CONTROL Panel & Feature Modules stagger
       gsap.fromTo(
         '.bs-left-panel',
-        { opacity: 0, x: -35 },
+        { opacity: 0, x: -40 },
         { opacity: 1, x: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: '.bs-main-row', start: 'top 78%' } }
       );
       gsap.fromTo(
@@ -283,7 +243,7 @@ export default function BrandStorySection() {
       gsap.fromTo(
         '.bs-svg-path',
         { strokeDashoffset: 400 },
-        { strokeDashoffset: 0, duration: 1.5, ease: 'power2.inOut', stagger: 0.15, scrollTrigger: { trigger: '.bs-center-arena', start: 'top 75%' } }
+        { strokeDashoffset: 0, duration: 1.6, ease: 'power2.inOut', stagger: 0.15, scrollTrigger: { trigger: '.bs-center-arena', start: 'top 75%' } }
       );
 
       // 4. Floating Nodes stagger
@@ -296,7 +256,7 @@ export default function BrandStorySection() {
       // 5. Right X Panel & Relationship Modules stagger
       gsap.fromTo(
         '.bs-right-panel',
-        { opacity: 0, x: 35 },
+        { opacity: 0, x: 40 },
         { opacity: 1, x: 0, duration: 1.1, ease: 'expo.out', delay: 0.15, scrollTrigger: { trigger: '.bs-main-row', start: 'top 78%' } }
       );
       gsap.fromTo(
@@ -316,13 +276,6 @@ export default function BrandStorySection() {
         .fromTo('.bs-eq-op--2', { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out' }, '-=0.3')
         .fromTo('.bs-eq-cap--3', { opacity: 0, y: 15, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: 'back.out(1.4)' }, '-=0.2');
 
-      // 7. Why Choose Us Section reveal
-      gsap.fromTo(
-        '.bs-why-panel',
-        { opacity: 0, y: 35 },
-        { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: '.bs-why-panel', start: 'top 85%' } }
-      );
-
     }, sectionRef);
 
     return () => ctx.revert();
@@ -332,7 +285,7 @@ export default function BrandStorySection() {
   const handleRelHover = (nodeIdx: number) => {
     setHoveredNode(nodeIdx);
     setPulseX(true);
-    setTimeout(() => setPulseX(false), 450);
+    setTimeout(() => setPulseX(false), 400);
   };
 
   const handleRelLeave = () => {
@@ -346,8 +299,8 @@ export default function BrandStorySection() {
     const x = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
     const y = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
     gsap.to(el, {
-      rotateX: -y * 3.5,
-      rotateY: x * 3.5,
+      rotateX: -y * 4,
+      rotateY: x * 4,
       duration: 0.3,
       ease: 'power2.out',
       transformPerspective: 1000,
@@ -364,12 +317,12 @@ export default function BrandStorySection() {
   };
 
   return (
-    <section ref={sectionRef} id="about" className="bs-section-master" aria-label="Control X Brand Story & Philosophy">
+    <section ref={sectionRef} id="about" className="bs-section-master" aria-label="Control X Brand Story">
       <div className="bs-container">
-        
-        {/* Section Header */}
+
+        {/* Section Top Header */}
         <div className="bs-header-wrap">
-          <span className="bs-header-tag">THE FOUNDATION & PHILOSOPHY</span>
+          <span className="bs-header-tag">OUR NAME. OUR PHILOSOPHY.</span>
           <h2 className="bs-header-headline">
             More Than <span className="bs-serif-em">Just a Name</span>
           </h2>
@@ -388,9 +341,6 @@ export default function BrandStorySection() {
             onMouseMove={handleTilt}
             onMouseLeave={handleTiltReset}
           >
-            {/* Diagonal specular light shine overlay */}
-            <div className="bs-glass-reflection" />
-
             <div className="bs-panel-header">
               <div className="bs-hex-badge">
                 <ShieldCheck className="w-5 h-5 text-emerald-600" />
@@ -398,10 +348,7 @@ export default function BrandStorySection() {
               <span className="bs-panel-tag">THE FOUNDATION</span>
             </div>
 
-            <div className="bs-title-group">
-              <h3 className="bs-panel-title">CONTROL</h3>
-              <div className="bs-accent-line" />
-            </div>
+            <h3 className="bs-panel-title">CONTROL</h3>
 
             <p className="bs-panel-desc">
               Your vision, your direction, your goals — always in your hands. We never overwrite your direction.
@@ -422,7 +369,6 @@ export default function BrandStorySection() {
                       <h4 className="bs-feature-title">{feat.title}</h4>
                       <p className="bs-feature-desc">{feat.desc}</p>
                     </div>
-                    <div className="bs-feature-dot" />
                   </div>
                 );
               })}
@@ -431,32 +377,21 @@ export default function BrandStorySection() {
 
           {/* ── CENTER PANEL: HERO INTERACTIVE X & CONNECTED NODES ──────────── */}
           <div className={`bs-center-arena ${pulseX ? 'bs-center-arena--pulse' : ''}`}>
-            {/* Diagonal specular light shine overlay */}
-            <div className="bs-glass-reflection" />
-
             {/* Interactive Canvas (3D Crystal X + Orbit Rings + Motes) */}
             <canvas ref={canvasRef} className="bs-canvas" />
 
-            {/* Curved SVG Connection Paths with Animated Motion Particles */}
-            <svg className="bs-svg-overlay" viewBox="0 0 400 480" preserveAspectRatio="none">
+            {/* Curved SVG Connection Paths with Animated Stroke & Pulse */}
+            <svg ref={svgRef} className="bs-svg-overlay" viewBox="0 0 400 480" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="curveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#0F8259" stopOpacity="0.8" />
-                  <stop offset="100%" stopColor="#10B981" stopOpacity="0.35" />
+                  <stop offset="0%" stopColor="#0F8259" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#10B981" stopOpacity="0.3" />
                 </linearGradient>
-                <filter id="particleGlow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
               </defs>
 
               {/* Curve 0: Creator (Top-Left) */}
               <path
-                id="path-creator"
-                d="M 65 75 C 100 130, 150 190, 200 230"
+                d="M 200 230 C 130 200, 90 120, 65 75"
                 fill="none"
                 stroke="url(#curveGrad)"
                 strokeWidth="2"
@@ -464,16 +399,10 @@ export default function BrandStorySection() {
                 strokeDashoffset="0"
                 className={`bs-svg-path ${hoveredNode === 0 ? 'bs-svg-path--active' : ''}`}
               />
-              {hoveredNode === 0 && (
-                <circle r="4" fill="#FFFFFF" filter="url(#particleGlow)">
-                  <animateMotion dur="2.0s" repeatCount="indefinite" path="M 65 75 C 100 130, 150 190, 200 230" />
-                </circle>
-              )}
 
               {/* Curve 1: Startup (Bottom-Left) */}
               <path
-                id="path-startup"
-                d="M 65 405 C 100 350, 150 270, 200 230"
+                d="M 200 230 C 130 260, 90 350, 65 395"
                 fill="none"
                 stroke="url(#curveGrad)"
                 strokeWidth="2"
@@ -481,16 +410,10 @@ export default function BrandStorySection() {
                 strokeDashoffset="0"
                 className={`bs-svg-path ${hoveredNode === 1 ? 'bs-svg-path--active' : ''}`}
               />
-              {hoveredNode === 1 && (
-                <circle r="4" fill="#FFFFFF" filter="url(#particleGlow)">
-                  <animateMotion dur="2.2s" repeatCount="indefinite" path="M 65 405 C 100 350, 150 270, 200 230" />
-                </circle>
-              )}
 
               {/* Curve 2: Business (Top-Right) */}
               <path
-                id="path-business"
-                d="M 335 75 C 300 130, 250 190, 200 230"
+                d="M 200 230 C 270 200, 310 120, 335 75"
                 fill="none"
                 stroke="url(#curveGrad)"
                 strokeWidth="2"
@@ -498,16 +421,10 @@ export default function BrandStorySection() {
                 strokeDashoffset="0"
                 className={`bs-svg-path ${hoveredNode === 2 ? 'bs-svg-path--active' : ''}`}
               />
-              {hoveredNode === 2 && (
-                <circle r="4" fill="#FFFFFF" filter="url(#particleGlow)">
-                  <animateMotion dur="1.9s" repeatCount="indefinite" path="M 335 75 C 300 130, 250 190, 200 230" />
-                </circle>
-              )}
 
               {/* Curve 3: Vision (Bottom-Right) */}
               <path
-                id="path-vision"
-                d="M 335 405 C 300 350, 250 270, 200 230"
+                d="M 200 230 C 270 260, 310 350, 335 395"
                 fill="none"
                 stroke="url(#curveGrad)"
                 strokeWidth="2"
@@ -515,14 +432,9 @@ export default function BrandStorySection() {
                 strokeDashoffset="0"
                 className={`bs-svg-path ${hoveredNode === 3 ? 'bs-svg-path--active' : ''}`}
               />
-              {hoveredNode === 3 && (
-                <circle r="4" fill="#FFFFFF" filter="url(#particleGlow)">
-                  <animateMotion dur="2.1s" repeatCount="indefinite" path="M 335 405 C 300 350, 250 270, 200 230" />
-                </circle>
-              )}
             </svg>
 
-            {/* 4 Connected Floating Glass Circular Nodes */}
+            {/* 4 Connected Floating Glass Nodes */}
             {NODES.map((node, idx) => {
               const IconComp = node.icon;
               const isHighlighted = hoveredNode === idx;
@@ -548,9 +460,6 @@ export default function BrandStorySection() {
             onMouseMove={handleTilt}
             onMouseLeave={handleTiltReset}
           >
-            {/* Diagonal specular light shine overlay */}
-            <div className="bs-glass-reflection" />
-
             <div className="bs-panel-header bs-panel-header--right">
               <div className="bs-hex-badge">
                 <Sparkles className="w-5 h-5 text-emerald-600" />
@@ -558,12 +467,9 @@ export default function BrandStorySection() {
               <span className="bs-panel-tag">COLLABORATION</span>
             </div>
 
-            <div className="bs-title-group bs-title-group--center">
-              <h3 className="bs-panel-title bs-panel-title--x">X</h3>
-              <div className="bs-accent-line" />
-            </div>
+            <h3 className="bs-panel-title bs-panel-title--x">X</h3>
 
-            <p className="bs-panel-desc bs-panel-desc--center">
+            <p className="bs-panel-desc">
               X represents collaboration — the meeting point where your vision and our engineering expertise intersect to create something extraordinary.
             </p>
 
@@ -594,83 +500,26 @@ export default function BrandStorySection() {
 
         </div>
 
-        {/* ── PROMISE EQUATION BAR (FLOATING GLASS CAPSULES & SIDE LINES) ──── */}
-        <div className="bs-promise-bar-container">
-          <div className="bs-side-line bs-side-line--left">
-            <span className="bs-line-mote" />
-          </div>
+        {/* ── PROMISE EQUATION BAR (FLOATING GLASS CAPSULES) ─────────────────── */}
+        <div className="bs-promise-bar">
+          <span className="bs-promise-tag">OUR PROMISE</span>
 
-          <div className="bs-promise-bar">
-            {/* Glass reflection sheen */}
-            <div className="bs-glass-reflection" />
-
-            <div className="bs-equation-row">
-              <div className="bs-eq-cap bs-eq-cap--1">
-                <div className="bs-eq-icon-badge">
-                  <User className="w-4 h-4 text-emerald-600" />
-                </div>
-                <div className="bs-eq-text-group">
-                  <span className="bs-cap-title text-emerald-700">Your Vision</span>
-                  <span className="bs-cap-sub">Your goals. Your dreams.</span>
-                </div>
-              </div>
-
-              <span className="bs-eq-op bs-eq-op--1">×</span>
-
-              <div className="bs-eq-cap bs-eq-cap--2">
-                <div className="bs-eq-icon-badge">
-                  <Layers className="w-4 h-4 text-emerald-600" />
-                </div>
-                <div className="bs-eq-text-group">
-                  <span className="bs-cap-title text-slate-800">Our Expertise</span>
-                  <span className="bs-cap-sub">Our skills. Our experience.</span>
-                </div>
-              </div>
-
-              <span className="bs-eq-op bs-eq-op--2">=</span>
-
-              <div className="bs-eq-cap bs-eq-cap--3 bs-eq-cap--result">
-                <div className="bs-eq-icon-badge bs-eq-icon-badge--green">
-                  <Sparkles className="w-4 h-4 text-emerald-600" />
-                </div>
-                <div className="bs-eq-text-group">
-                  <span className="bs-cap-title bs-cap-title--result">Extraordinary Digital Experiences</span>
-                  <span className="bs-cap-sub">Impact that lasts. Value that grows.</span>
-                </div>
-              </div>
+          <div className="bs-equation-row">
+            <div className="bs-eq-cap bs-eq-cap--1">
+              <span className="bs-cap-text bs-cap-text--green">Your Vision</span>
             </div>
-          </div>
 
-          <div className="bs-side-line bs-side-line--right">
-            <span className="bs-line-mote" />
-          </div>
-        </div>
+            <span className="bs-eq-op bs-eq-op--1">×</span>
 
-        {/* ── PART 2: WHY CHOOSE US SECTION (6 BENEFIT COLUMNS) ────────────── */}
-        <div className="bs-why-panel">
-          {/* Glass reflection sheen */}
-          <div className="bs-glass-reflection" />
+            <div className="bs-eq-cap bs-eq-cap--2">
+              <span className="bs-cap-text bs-cap-text--dark">Our Expertise</span>
+            </div>
 
-          <div className="bs-why-header">
-            <span className="bs-why-tag">WHY CHOOSE US</span>
-            <h3 className="bs-why-headline">
-              Built Different. <span className="bs-serif-em">For Results That Matter.</span>
-            </h3>
-          </div>
+            <span className="bs-eq-op bs-eq-op--2">=</span>
 
-          <div className="bs-why-grid">
-            {WHY_CHOOSE_ITEMS.map((item, idx) => {
-              const IconComp = item.icon;
-              return (
-                <div key={idx} className="bs-why-card">
-                  <div className="bs-why-icon-badge">
-                    <IconComp className="w-4.5 h-4.5 text-emerald-600" />
-                  </div>
-                  <h4 className="bs-why-card-title">{item.title}</h4>
-                  <p className="bs-why-card-desc">{item.desc}</p>
-                </div>
-              );
-            })}
+            <div className="bs-eq-cap bs-eq-cap--3 bs-eq-cap--result">
+              <span className="bs-cap-text bs-cap-text--result">Extraordinary Digital Experiences</span>
+            </div>
           </div>
         </div>
 

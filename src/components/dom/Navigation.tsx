@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
 const NAV_LINKS = [
-  { label: 'Services',  href: '#services' },
-  { label: 'Work',      href: '#work' },
-  { label: 'About',     href: '#about' },
-  { label: 'Process',   href: '#process' },
+  { label: 'Services', href: '#services' },
+  { label: 'Work', href: '#work' },
+  { label: 'About', href: '#about' },
+  { label: 'Process', href: '#process' },
 ];
 
 export default function Navigation() {
@@ -45,9 +45,12 @@ export default function Navigation() {
 
       {/* Right actions */}
       <div className="nav-actions">
-        <Link href="/login" className="nav-btn nav-btn--ghost">
-          Client Login
-        </Link>
+        <button className="nav-btn nav-btn--ghost" type="button" aria-label="Search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+          </svg>
+          Search
+        </button>
         <Link href="#contact" className="nav-btn nav-btn--filled">
           Get Started
         </Link>
