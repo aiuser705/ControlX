@@ -4,40 +4,43 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { gsap } from 'gsap';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Check, AlertCircle, CheckCircle2 } from 'lucide-react';
+import {
+  Mail, Lock, Eye, EyeOff,
+  ArrowRight, Check, AlertCircle, CheckCircle2,
+} from 'lucide-react';
 import CatMascot, { CatState } from '@/components/dom/CatMascot';
 
 export default function LoginCard() {
   const router = useRouter();
 
-  // ── Form State ──────────────────────────────────────────────────────────
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  // ── Form fields ──────────────────────────────────────────────────────────
+  const [email,        setEmail]        = useState('');
+  const [password,     setPassword]     = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe,   setRememberMe]   = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [errorMsg,     setErrorMsg]     = useState<string | null>(null);
+  const [successMsg,   setSuccessMsg]   = useState<string | null>(null);
 
-  // ── Cat State Machine ───────────────────────────────────────────────────
+  // ── Cat state ────────────────────────────────────────────────────────────
   const [catState, setCatState] = useState<CatState>('idle');
+
+  // ── Refs ─────────────────────────────────────────────────────────────────
+  const wrapperRef   = useRef<HTMLDivElement>(null);
+  const cardInnerRef = useRef<HTMLDivElement>(null);
   const returnStateRef = useRef<CatState>('idle');
 
-  // ── Refs ────────────────────────────────────────────────────────────────
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  // ── Entrance GSAP Animation ──────────────────────────────────────────────
+  // ── Page entrance animation ───────────────────────────────────────────────
   useEffect(() => {
     if (!wrapperRef.current) return;
     gsap.fromTo(
       wrapperRef.current,
       { opacity: 0, y: 32, scale: 0.97 },
-      { opacity: 1, y: 0, scale: 1, duration: 1, ease: 'expo.out', delay: 0.15 }
+      { opacity: 1, y: 0, scale: 1, duration: 1.1, ease: 'expo.out', delay: 0.1 }
     );
   }, []);
 
-  // ── Card Shake Helper on Error ──────────────────────────────────────────
+  // ── Card shake on error ───────────────────────────────────────────────────
   const shakeCard = useCallback(() => {
     if (!wrapperRef.current) return;
     gsap.to(wrapperRef.current, {
@@ -53,12 +56,18 @@ export default function LoginCard() {
     });
   }, []);
 
-  // ── Input Focus & Typing Event Handlers ──────────────────────────────────
+  // ── Input event handlers ──────────────────────────────────────────────────
   const onEmailFocus = () => {
     if (catState === 'success') return;
     setCatState('typing');
     returnStateRef.current = 'idle';
     setErrorMsg(null);
+  };
+
+  const onAnyBlur = () => {
+    if (catState === 'error' || catState === 'success') return;
+    setCatState('idle');
+    returnStateRef.current = 'idle';
   };
 
   const onPasswordFocus = () => {
@@ -69,18 +78,12 @@ export default function LoginCard() {
     setErrorMsg(null);
   };
 
-  const onPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onPasswordInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
     if (catState === 'success') return;
     const next: CatState = showPassword ? 'password-visible' : 'password-hidden';
     setCatState(next);
     returnStateRef.current = next;
-  };
-
-  const onBlur = () => {
-    if (catState === 'error' || catState === 'success') return;
-    setCatState('idle');
-    returnStateRef.current = 'idle';
   };
 
   const onToggleVisibility = () => {
@@ -91,7 +94,7 @@ export default function LoginCard() {
     returnStateRef.current = nextCat;
   };
 
-  // ── Form Submit Handler ──────────────────────────────────────────────────
+  // ── Form submit ───────────────────────────────────────────────────────────
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -102,20 +105,18 @@ export default function LoginCard() {
       setErrorMsg('Please enter a valid email address.');
       setCatState('error');
       shakeCard();
-      setTimeout(() => setCatState(returnStateRef.current), 2200);
+      setTimeout(() => setCatState(returnStateRef.current), 2400);
       return;
     }
-    if (!password || password.length < 1) {
+    if (!password) {
       setErrorMsg('Password is required.');
       setCatState('error');
       shakeCard();
-      setTimeout(() => setCatState(returnStateRef.current), 2200);
+      setTimeout(() => setCatState(returnStateRef.current), 2400);
       return;
     }
 
     setIsSubmitting(true);
-    setCatState('typing');
-
     setTimeout(() => {
       setIsSubmitting(false);
 
@@ -124,15 +125,16 @@ export default function LoginCard() {
         setCatState('error');
         shakeCard();
         setTimeout(() => {
-          setCatState(showPassword ? 'password-visible' : 'password-hidden');
-          returnStateRef.current = showPassword ? 'password-visible' : 'password-hidden';
-        }, 2200);
+          const revert: CatState = showPassword ? 'password-visible' : 'password-hidden';
+          setCatState(revert);
+          returnStateRef.current = revert;
+        }, 2400);
       } else {
         setSuccessMsg('Login successful! Welcome back.');
         setCatState('success');
-        if (cardRef.current) {
-          gsap.to(cardRef.current, {
-            boxShadow: '0 0 0 2px rgba(16,185,129,0.4), 0 24px 60px rgba(16,185,129,0.18)',
+        if (cardInnerRef.current) {
+          gsap.to(cardInnerRef.current, {
+            boxShadow: '0 0 0 2px rgba(16,185,129,0.5), 0 24px 60px rgba(16,185,129,0.18)',
             duration: 0.6,
             ease: 'power2.out',
           });
@@ -143,32 +145,29 @@ export default function LoginCard() {
   };
 
   const emailValid = email.includes('@') && email.includes('.');
-  const passwordBorderClass = catState === 'error'
-    ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/10'
-    : 'border-slate-200/80 focus:border-emerald-600 focus:ring-emerald-600/10';
 
   return (
     <div
       ref={wrapperRef}
-      className="relative w-full max-w-[460px] overflow-visible"
+      className="relative w-full max-w-[440px] overflow-visible mt-20"
     >
-      {/* ── FIXED CHARACTER STAGE SLOT ─────────────────────────────────────
-          Anchored to the top-center of the login card.
-          Cat paws sit and overlap naturally on the card's top border.
+      {/* ── CAT STAGE ANCHOR ───────────────────────────────────────────────
+          Fixed stage anchored at -top-[192px] above the login card.
+          Paw baseline Y=320 inside 360 canvas sits paws directly on top edge.
       ─────────────────────────────────────────────────────────────────── */}
       <div
         aria-hidden="true"
-        className="absolute left-1/2 -translate-x-1/2 -top-[172px] z-20 pointer-events-none"
+        className="absolute left-1/2 -translate-x-1/2 -top-[192px] z-20 pointer-events-none"
       >
         <CatMascot state={catState} showDebugLabel={false} />
       </div>
 
-      {/* ── FROSTED GLASS LOGIN CARD ─────────────────────────────────────── */}
+      {/* ── FROSTED GLASS CARD ─────────────────────────────────────────── */}
       <div
-        ref={cardRef}
-        className="login-card-master relative z-10 w-full rounded-[28px] p-8 md:p-10 pt-14 md:pt-16 overflow-hidden"
+        ref={cardInnerRef}
+        className="relative z-10 w-full rounded-[28px] p-8 md:p-10 pt-12 md:pt-14 overflow-hidden bg-white/90 backdrop-blur-xl border border-white/80 shadow-2xl shadow-emerald-950/10"
       >
-        {/* Specular glass reflection */}
+        {/* Specular glass sheen overlay */}
         <div className="bs-glass-reflection" aria-hidden="true" />
 
         {/* Card Header */}
@@ -211,9 +210,9 @@ export default function LoginCard() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onFocus={onEmailFocus}
-                onBlur={onBlur}
+                onBlur={onAnyBlur}
                 placeholder="name@company.com"
-                className="w-full pl-10 pr-10 py-3 rounded-xl bg-white/70 border border-slate-200/80 focus:border-emerald-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-600/10 text-slate-900 text-sm placeholder-slate-400 transition-all duration-200"
+                className="w-full pl-10 pr-10 py-3 rounded-xl bg-slate-50/70 border border-slate-200/80 focus:border-emerald-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-600/10 text-slate-900 text-sm placeholder-slate-400 transition-all duration-200"
               />
               {emailValid && (
                 <Check className="absolute right-3.5 w-4 h-4 text-emerald-600 pointer-events-none" />
@@ -233,11 +232,15 @@ export default function LoginCard() {
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
                 value={password}
-                onChange={onPasswordChange}
+                onChange={onPasswordInput}
                 onFocus={onPasswordFocus}
-                onBlur={onBlur}
+                onBlur={onAnyBlur}
                 placeholder="••••••••••••"
-                className={`w-full pl-10 pr-11 py-3 rounded-xl bg-white/70 border focus:bg-white focus:outline-none focus:ring-4 text-slate-900 text-sm placeholder-slate-400 transition-all duration-200 ${passwordBorderClass}`}
+                className={`w-full pl-10 pr-11 py-3 rounded-xl bg-slate-50/70 border focus:bg-white focus:outline-none focus:ring-4 text-slate-900 text-sm placeholder-slate-400 transition-all duration-200 ${
+                  catState === 'error'
+                    ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/10'
+                    : 'border-slate-200/80 focus:border-emerald-600 focus:ring-emerald-600/10'
+                }`}
               />
               <button
                 type="button"
@@ -270,6 +273,7 @@ export default function LoginCard() {
           {/* Submit CTA */}
           <button
             type="submit"
+            id="lp-login-btn"
             disabled={isSubmitting || catState === 'success'}
             className="w-full py-3.5 rounded-xl bg-[#0F8259] hover:bg-[#0c6b49] text-white text-sm font-semibold tracking-wide shadow-md shadow-emerald-700/20 hover:shadow-emerald-700/35 active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
           >
