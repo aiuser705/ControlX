@@ -147,11 +147,11 @@ export default function GlassX({
       gl.ARRAY_BUFFER,
       new Float32Array([
         -1, -1, 0, 0,
-         1, -1, 1, 0,
-        -1,  1, 0, 1,
-        -1,  1, 0, 1,
-         1, -1, 1, 0,
-         1,  1, 1, 1,
+        1, -1, 1, 0,
+        -1, 1, 0, 1,
+        -1, 1, 0, 1,
+        1, -1, 1, 0,
+        1, 1, 1, 1,
       ]),
       gl.STATIC_DRAW
     );
@@ -212,7 +212,7 @@ export default function GlassX({
       }
     });
 
-    videoA.play().catch(() => {});
+    videoA.play().catch(() => { });
     let activePlayer = 'A';
     let isCrossfading = false;
     let crossfadeProgress = 0.0;
@@ -230,10 +230,10 @@ export default function GlassX({
         isCrossfading = true;
         if (activePlayer === 'A') {
           videoB.currentTime = 0;
-          videoB.play().catch(() => {});
+          videoB.play().catch(() => { });
         } else {
           videoA.currentTime = 0;
-          videoA.play().catch(() => {});
+          videoA.play().catch(() => { });
         }
       }
 

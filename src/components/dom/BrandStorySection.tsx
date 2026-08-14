@@ -12,6 +12,11 @@ import {
   Briefcase,
   Star,
   ArrowRight,
+  TrendingUp,
+  UserCheck,
+  Award,
+  Clock,
+  Handshake,
 } from 'lucide-react';
 
 if (typeof window !== 'undefined') {
@@ -50,10 +55,46 @@ const NODES = [
   { id: 'vision', label: 'YOUR VISION', icon: Star, pos: 'bottom-right' },
 ];
 
+const WHY_CHOOSE_US = [
+  {
+    icon: Target,
+    title: 'Strategic By Design',
+    desc: 'We combine strategy and creativity to build digital experiences that perform.',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Scalable & Future-Ready',
+    desc: 'We use modern technologies and best practices to ensure your brand is future-proof.',
+  },
+  {
+    icon: UserCheck,
+    title: 'Client-Centric',
+    desc: 'Your goals drive every decision. You stay in control at every step of the journey.',
+  },
+  {
+    icon: Award,
+    title: 'Quality Without Compromise',
+    desc: 'Clean code, thoughtful design, and rigorous testing — every time.',
+  },
+  {
+    icon: Clock,
+    title: 'Timely Delivery',
+    desc: 'We respect your time and consistently deliver on schedule.',
+  },
+  {
+    icon: Handshake,
+    title: 'Long-Term Partner',
+    desc: "We don't just launch projects. We build relationships that create lasting value.",
+  },
+];
+
 export default function BrandStorySection() {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+  const pathRefs = useRef<(SVGPathElement | null)[]>([]);
+  const particleGroupRef = useRef<SVGGElement>(null);
+  const particleTweenRef = useRef<gsap.core.Tween | null>(null);
 
   const [hoveredNode, setHoveredNode] = useState<number | null>(null);
   const [pulseX, setPulseX] = useState(false);
@@ -206,6 +247,67 @@ export default function BrandStorySection() {
     };
   }, []);
 
+  // ── Particle Animation Trigger on Hover/Active Card (OPTION A) ─────
+  useEffect(() => {
+    // Stop any running particle animation
+    if (particleTweenRef.current) {
+      particleTweenRef.current.kill();
+      particleTweenRef.current = null;
+    }
+
+    const particleGroup = particleGroupRef.current;
+    if (!particleGroup) return;
+
+    // Default: No particle moving when nothing is hovered
+    if (hoveredNode === null) {
+      gsap.to(particleGroup, { opacity: 0, duration: 0.2, overwrite: true });
+      return;
+    }
+
+    const activePath = pathRefs.current[hoveredNode];
+    if (!activePath) return;
+
+    let totalLength = 0;
+    try {
+      totalLength = activePath.getTotalLength();
+    } catch {
+      return;
+    }
+    if (totalLength <= 0) return;
+
+    // Set initial position at Node (progress = 0) and reveal
+    const startPt = activePath.getPointAtLength(0);
+    gsap.set(particleGroup, {
+      opacity: 1,
+      transform: `translate(${startPt.x}px, ${startPt.y}px)`,
+    });
+
+    const progressObj = { val: 0 };
+
+    // Move Node -> X -> Node in continuous loop (2.2s roundtrip)
+    particleTweenRef.current = gsap.to(progressObj, {
+      val: 1,
+      duration: 1.1,
+      ease: 'sine.inOut',
+      repeat: -1,
+      yoyo: true,
+      onUpdate: () => {
+        if (!particleGroupRef.current || !activePath) return;
+        const currentPt = activePath.getPointAtLength(progressObj.val * totalLength);
+        gsap.set(particleGroupRef.current, {
+          transform: `translate(${currentPt.x}px, ${currentPt.y}px)`,
+        });
+      },
+    });
+
+    return () => {
+      if (particleTweenRef.current) {
+        particleTweenRef.current.kill();
+        particleTweenRef.current = null;
+      }
+    };
+  }, [hoveredNode]);
+
   // ── GSAP ScrollTrigger Sequence ──────────────────────────────────
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -275,6 +377,55 @@ export default function BrandStorySection() {
         .fromTo('.bs-eq-cap--2', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.6, ease: 'expo.out' }, '-=0.2')
         .fromTo('.bs-eq-op--2', { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out' }, '-=0.3')
         .fromTo('.bs-eq-cap--3', { opacity: 0, y: 15, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: 'back.out(1.4)' }, '-=0.2');
+
+      // 7. WHY CHOOSE US Section reveal
+      gsap.fromTo(
+        '.bs-why-container',
+        { opacity: 0, y: 35 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1.1,
+          ease: 'expo.out',
+          scrollTrigger: { trigger: '.bs-why-container', start: 'top 85%' },
+        }
+      );
+      gsap.fromTo(
+        '.bs-why-tag',
+        { opacity: 0, y: 15 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: 'expo.out',
+          scrollTrigger: { trigger: '.bs-why-container', start: 'top 82%' },
+        }
+      );
+      gsap.fromTo(
+        '.bs-why-headline',
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: 'expo.out',
+          delay: 0.1,
+          scrollTrigger: { trigger: '.bs-why-container', start: 'top 82%' },
+        }
+      );
+      gsap.fromTo(
+        '.bs-why-card',
+        { opacity: 0, y: 20, scale: 0.96 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.7,
+          ease: 'expo.out',
+          stagger: 0.1,
+          scrollTrigger: { trigger: '.bs-why-row', start: 'top 85%' },
+        }
+      );
 
     }, sectionRef);
 
@@ -387,11 +538,24 @@ export default function BrandStorySection() {
                   <stop offset="0%" stopColor="#0F8259" stopOpacity="0.85" />
                   <stop offset="100%" stopColor="#10B981" stopOpacity="0.3" />
                 </linearGradient>
+                <radialGradient id="particleGlowGrad">
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+                  <stop offset="35%" stopColor="#a8f0d4" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                </radialGradient>
+                <filter id="whiteGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="2.5" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
               </defs>
 
               {/* Curve 0: Creator (Top-Left) */}
               <path
-                d="M 200 230 C 130 200, 90 120, 65 75"
+                ref={(el) => { pathRefs.current[0] = el; }}
+                d="M 65 75 C 90 120, 130 200, 200 230"
                 fill="none"
                 stroke="url(#curveGrad)"
                 strokeWidth="2"
@@ -402,7 +566,8 @@ export default function BrandStorySection() {
 
               {/* Curve 1: Startup (Bottom-Left) */}
               <path
-                d="M 200 230 C 130 260, 90 350, 65 395"
+                ref={(el) => { pathRefs.current[1] = el; }}
+                d="M 65 395 C 90 350, 130 260, 200 230"
                 fill="none"
                 stroke="url(#curveGrad)"
                 strokeWidth="2"
@@ -413,7 +578,8 @@ export default function BrandStorySection() {
 
               {/* Curve 2: Business (Top-Right) */}
               <path
-                d="M 200 230 C 270 200, 310 120, 335 75"
+                ref={(el) => { pathRefs.current[2] = el; }}
+                d="M 335 75 C 310 120, 270 200, 200 230"
                 fill="none"
                 stroke="url(#curveGrad)"
                 strokeWidth="2"
@@ -424,7 +590,8 @@ export default function BrandStorySection() {
 
               {/* Curve 3: Vision (Bottom-Right) */}
               <path
-                d="M 200 230 C 270 260, 310 350, 335 395"
+                ref={(el) => { pathRefs.current[3] = el; }}
+                d="M 335 395 C 310 350, 270 260, 200 230"
                 fill="none"
                 stroke="url(#curveGrad)"
                 strokeWidth="2"
@@ -432,6 +599,12 @@ export default function BrandStorySection() {
                 strokeDashoffset="0"
                 className={`bs-svg-path ${hoveredNode === 3 ? 'bs-svg-path--active' : ''}`}
               />
+
+              {/* Moving White Glowing Particle (Triggers ONLY on Hover / Active Node) */}
+              <g ref={particleGroupRef} style={{ opacity: 0, pointerEvents: 'none' }}>
+                <circle cx="0" cy="0" r="11" fill="url(#particleGlowGrad)" />
+                <circle cx="0" cy="0" r="3.5" fill="#ffffff" filter="url(#whiteGlow)" />
+              </g>
             </svg>
 
             {/* 4 Connected Floating Glass Nodes */}
@@ -467,9 +640,12 @@ export default function BrandStorySection() {
               <span className="bs-panel-tag">COLLABORATION</span>
             </div>
 
-            <h3 className="bs-panel-title bs-panel-title--x">X</h3>
+            <div className="bs-x-heading-wrap">
+              <h3 className="bs-panel-title bs-panel-title--x">X</h3>
+              <div className="bs-accent-line" />
+            </div>
 
-            <p className="bs-panel-desc">
+            <p className="bs-panel-desc bs-panel-desc--x">
               X represents collaboration — the meeting point where your vision and our engineering expertise intersect to create something extraordinary.
             </p>
 
@@ -520,6 +696,32 @@ export default function BrandStorySection() {
             <div className="bs-eq-cap bs-eq-cap--3 bs-eq-cap--result">
               <span className="bs-cap-text bs-cap-text--result">Extraordinary Digital Experiences</span>
             </div>
+          </div>
+        </div>
+
+        {/* ── 16. WHY CHOOSE US SECTION (PREMIUM GLASS SYSTEM) ──────────────── */}
+        <div className="bs-why-container">
+          <div className="bs-why-header">
+            <span className="bs-why-tag">WHY CHOOSE US</span>
+            <h3 className="bs-why-headline">
+              Built Different. <span className="bs-serif-em">For Results That Matter.</span>
+            </h3>
+          </div>
+
+          <div className="bs-why-row">
+            {WHY_CHOOSE_US.map((item, idx) => {
+              const IconComp = item.icon;
+              return (
+                <div key={idx} className="bs-why-card">
+                  <div className="bs-why-icon-wrap">
+                    <IconComp className="w-4.5 h-4.5 text-emerald-600" />
+                  </div>
+                  <h4 className="bs-why-title">{item.title}</h4>
+                  <p className="bs-why-desc">{item.desc}</p>
+                  {idx < WHY_CHOOSE_US.length - 1 && <div className="bs-why-divider" />}
+                </div>
+              );
+            })}
           </div>
         </div>
 

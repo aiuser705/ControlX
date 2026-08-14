@@ -1,2 +1,5 @@
-// Removed during rollback to MILESTONE_V1_APPROVED
-export {};
+'use client';
+
+import GlassX from '../dom/GlassX';
+
+export default GlassX;

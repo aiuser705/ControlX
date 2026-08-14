@@ -31,9 +31,9 @@ export default function HeroSection() {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ delay: 0.4 });
 
-      // GlassX reveals with subtle scale & entrance
+      // GlassX & Control text reveal with subtle scale & entrance
       tl.fromTo(
-        '.glass-x-scene',
+        ['.hero-brandmark__text', '.hero-section .glass-x-scene'],
         { opacity: 0, y: -30, scale: 0.92 },
         { opacity: 1, y: 0, scale: 1, duration: 1.3, ease: 'expo.out' },
         0
@@ -104,8 +104,11 @@ export default function HeroSection() {
       aria-label="Hero"
       style={{ position: 'relative', zIndex: 10 }}
     >
-      {/* Layers 2-6: Ground Shadow -> Hero X Video -> Reflection -> Specular Sheen -> Cursor Glow */}
-      <GlassX src="/videos/x_animation_3.mp4" />
+      {/* Layers 2-6: Hero Brand Mark ("Control" Text + 3D Glass X) */}
+      <div className="hero-brandmark">
+        <span className="hero-brandmark__text">Control</span>
+        <GlassX src="/videos/x_animation_3.mp4" />
+      </div>
 
       {/* Layer 7: Hero Text (Tagline, Headline, Subline) */}
       <div style={{ position: 'relative', zIndex: 7 }}>

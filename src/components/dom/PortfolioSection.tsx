@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -11,27 +12,48 @@ if (typeof window !== 'undefined') {
 const PORTFOLIO_ITEMS = [
   {
     id: '01',
-    title: 'Aetheria Refractive Optics',
-    category: 'Spatial Design & WebGL Optics',
-    desc: 'High-precision optical glass refraction maps with physical caustics dispersion.',
-    imageBg: 'linear-gradient(135deg, rgba(15, 130, 89, 0.4) 0%, rgba(6, 77, 51, 0.8) 100%)',
-    prismType: 'Pyramidal Glass Crystal',
+    title: 'Brand VIP',
+    category: 'Brand & Identity Platform',
+    desc: 'Exclusive brand identity and high-end digital presentation system.',
+    url: 'https://brand-vip.vercel.app/',
+    imageSrc: '/assets/projects/brand-vip.png',
+    prismType: 'AURA · Fall/Winter Collection',
   },
   {
     id: '02',
-    title: 'Kinetic Monolith Systems',
-    category: 'Interactive Installation',
-    desc: 'Real-time 3D physics interaction engine driving physical stage lighting.',
-    imageBg: 'linear-gradient(135deg, rgba(20, 80, 60, 0.5) 0%, rgba(12, 45, 35, 0.9) 100%)',
-    prismType: 'Bevelled Cubic Slab',
+    title: 'Portfolio',
+    category: 'Interactive Portfolio & Showcase',
+    desc: 'Minimalist, high-performance personal portfolio experience.',
+    url: 'https://portfolio-v1-sigma-brown.vercel.app/',
+    imageSrc: '/assets/projects/portfolio.png',
+    prismType: 'Rahul · Web Designer',
   },
   {
     id: '03',
-    title: 'Luminary Brand Platform',
-    category: 'Luxury E-Commerce & Editorial',
-    desc: 'Bespoke luxury agency platform combining Playfair Display typography with glassmorphism.',
-    imageBg: 'linear-gradient(135deg, rgba(16, 185, 129, 0.35) 0%, rgba(4, 46, 30, 0.85) 100%)',
-    prismType: 'Floating Prismatic Octahedron',
+    title: 'Salon VIP',
+    category: 'Luxury Service & Booking Platform',
+    desc: 'Bespoke salon and wellness luxury digital platform.',
+    url: 'https://salon-vip.vercel.app/',
+    imageSrc: '/assets/projects/salon-vip.png',
+    prismType: 'Maison Noir · Colour Art',
+  },
+  {
+    id: '04',
+    title: 'Gym VIP',
+    category: 'Fitness & Premium Membership',
+    desc: 'High-energy, modern fitness and performance platform.',
+    url: 'https://gym-vip.vercel.app/',
+    imageSrc: '/assets/projects/gym-vip.png',
+    prismType: 'IRONYARD · Reception',
+  },
+  {
+    id: '05',
+    title: 'Interactive Login Experience',
+    category: 'Interactive Web Experience',
+    desc: 'A playful interactive login interface with a responsive character-based interaction system.',
+    url: '/login',
+    imageSrc: '/assets/projects/login-experience.png',
+    prismType: 'ControlX · Interactive Mascot System',
   },
 ];
 
@@ -73,37 +95,47 @@ export default function PortfolioSection() {
 
       <div className="portfolio-track-wrapper">
         <div ref={trackRef} className="portfolio-track">
-          {PORTFOLIO_ITEMS.map((item) => (
-            <div key={item.id} className="portfolio-card glass-card">
-              {/* Giant Index Number */}
-              <div className="portfolio-card__number">{item.id}</div>
-
-              {/* Prism Visual Area */}
-              <div
-                className="portfolio-card__visual"
-                style={{ background: item.imageBg }}
+          {PORTFOLIO_ITEMS.map((item) => {
+            const isExternal = item.url.startsWith('http');
+            return (
+              <a
+                key={item.id}
+                href={item.url}
+                target={isExternal ? '_blank' : undefined}
+                rel={isExternal ? 'noopener noreferrer' : undefined}
+                className="portfolio-card glass-card"
+                style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
               >
-                {/* SVG Prism Artwork */}
-                <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="portfolio-prism-svg">
-                  <polygon points="90,20 150,140 30,140" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5"/>
-                  <polygon points="90,20 150,140 90,120" fill="rgba(255,255,255,0.15)"/>
-                  <polygon points="90,20 30,140 90,120" fill="rgba(255,255,255,0.35)"/>
-                  <line x1="90" y1="20" x2="90" y2="120" stroke="#A8F0D4" strokeWidth="1.5"/>
-                </svg>
-                <div className="portfolio-card__label">{item.prismType}</div>
-              </div>
+                {/* Giant Index Number */}
+                <div className="portfolio-card__number">{item.id}</div>
 
-              {/* Card Meta Content */}
-              <div className="portfolio-card__content">
-                <span className="portfolio-card__category">{item.category}</span>
-                <h3 className="portfolio-card__title">{item.title}</h3>
-                <p className="portfolio-card__desc">{item.desc}</p>
-                <button className="btn-secondary" type="button">
-                  View Case Study
-                </button>
-              </div>
-            </div>
-          ))}
+                {/* Real Website Landing Page Visual Area */}
+                <div className="portfolio-card__visual">
+                  <Image
+                    src={item.imageSrc}
+                    alt={`${item.title} Landing Page Preview`}
+                    fill
+                    sizes="(max-width: 640px) 320px, 520px"
+                    style={{ objectFit: 'cover', objectPosition: 'top' }}
+                    className="portfolio-card__img"
+                    unoptimized
+                  />
+                  <div className="portfolio-card__img-overlay" />
+                  <div className="portfolio-card__label">{item.prismType}</div>
+                </div>
+
+                {/* Card Meta Content */}
+                <div className="portfolio-card__content">
+                  <span className="portfolio-card__category">{item.category}</span>
+                  <h3 className="portfolio-card__title">{item.title}</h3>
+                  <p className="portfolio-card__desc">{item.desc}</p>
+                  <span className="btn-secondary inline-flex items-center gap-2" style={{ display: 'inline-flex' }}>
+                    View Project &rarr;
+                  </span>
+                </div>
+              </a>
+            );
+          })}
         </div>
       </div>
     </section>

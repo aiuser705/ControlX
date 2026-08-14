@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import LoginCatStage, { CatState } from '@/components/dom/LoginCatStage';
 import styles from './login.module.css';
 
@@ -154,58 +155,14 @@ function LoginForm({ onLogin }: LoginFormProps) {
       <div className={styles.shell}>
         {/* LEFT PANEL */}
         <div className={styles.left}>
-          <div>
-            <div className={styles.brand}>
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M3 3L21 21M21 3L3 21" stroke="#2f6b47" strokeWidth="4" strokeLinecap="round" />
-              </svg>
-              CONTROL X
-            </div>
-            <div className={styles.headline}>
-              <h1>
-                Welcome
-                <br />
-                back!
-              </h1>
-              <div className={styles.rule}></div>
-              <p>Great to see you again.</p>
-              <p>Let&apos;s continue where you left off.</p>
-            </div>
-          </div>
-
-          <svg className={styles.glassX} viewBox="0 0 200 220">
-            <defs>
-              <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#eaf5ee" stopOpacity="0.9" />
-                <stop offset="1" stopColor="#9cc2ab" stopOpacity="0.5" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M20 20 L90 100 L20 200 M50 20 L120 100 M180 20 L110 100 L180 200 M150 20 L80 100"
-              stroke="url(#glassGrad)"
-              strokeWidth="16"
-              strokeLinecap="round"
-              fill="none"
-              opacity="0.85"
-            />
-            <path
-              d="M20 20 L180 200 M180 20 L20 200"
-              stroke="url(#glassGrad)"
-              strokeWidth="20"
-              strokeLinecap="round"
-              fill="none"
-            />
-          </svg>
-
-          <div className={styles.trust}>
-            Trusted by creative teams worldwide
-            <div className={styles.trustLogos}>
-              <span>stripe</span>
-              <span>◆ Notion</span>
-              <span>◐ Linear</span>
-              <span>▲ Vercel</span>
-            </div>
-          </div>
+          <Image
+            src="/assets/left-panel.png"
+            alt="ControlX Brand Panel"
+            fill
+            style={{ objectFit: 'cover' }}
+            priority
+            unoptimized
+          />
         </div>
 
         {/* RIGHT PANEL */}

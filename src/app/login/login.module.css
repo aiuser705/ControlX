@@ -37,11 +37,9 @@
 
 .left {
   flex: 1;
-  padding: 48px 44px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background: linear-gradient(160deg, #eef4ef, #dfeee4);
+  position: relative;
+  overflow: hidden;
+  min-height: 620px;
 }
 
 .brand {

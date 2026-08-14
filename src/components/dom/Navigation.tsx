@@ -28,8 +28,10 @@ export default function Navigation() {
     >
       {/* Logo */}
       <Link href="/" className="nav-logo" aria-label="Control X home">
-        <span className="nav-logo__x" aria-hidden="true">X</span>
-        <span className="nav-logo__wordmark">CONTROL X</span>
+        <svg viewBox="0 0 24 24" fill="none" width="22" height="22" className="nav-logo__x-icon" aria-hidden="true">
+          <path d="M3 3L21 21M21 3L3 21" stroke="#0F8259" strokeWidth="4" strokeLinecap="round" />
+        </svg>
+        <span className="nav-logo__wordmark">CONTROL</span>
       </Link>
 
       {/* Centre links */}
