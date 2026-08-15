@@ -2,18 +2,18 @@
 
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import GlassX from './GlassX';
+import ChromaKeyVideo from './ChromaKeyVideo';
 
 /**
  * HeroSection — Opening Viewport Experience
  *
  * Strict Render Layer Stack:
  *   1. Background (page.tsx)
- *   2. Ground Shadow (GlassX internal Layer 2)
- *   3. Hero X Video (GlassX internal Layer 3 - WebGL edge-aware keyed canvas)
- *   4. Reflection Overlay (GlassX internal Layer 4)
- *   5. Specular Highlight Layer (GlassX internal Layer 5)
- *   6. Cursor Highlight (GlassX internal Layer 6)
+ *   2. Ground Shadow (ChromaKeyVideo internal Layer 2)
+ *   3. Hero X Video (ChromaKeyVideo internal Layer 3 - Canvas real-time chroma key)
+ *   4. Reflection Overlay (ChromaKeyVideo internal Layer 4)
+ *   5. Specular Highlight Layer (ChromaKeyVideo internal Layer 5)
+ *   6. Cursor Highlight (ChromaKeyVideo internal Layer 6)
  *   7. Hero Text (Tagline, Headline, Subline - zIndex 7)
  *   8. Buttons (CTA buttons - zIndex 8)
  *   9. Custom Cursor (Top overlay - zIndex 999)
@@ -31,7 +31,7 @@ export default function HeroSection() {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ delay: 0.4 });
 
-      // GlassX & Control text reveal with subtle scale & entrance
+      // ChromaKeyVideo & Control text reveal with subtle scale & entrance
       tl.fromTo(
         ['.hero-brandmark__text', '.hero-section .glass-x-scene'],
         { opacity: 0, y: -30, scale: 0.92 },
@@ -59,24 +59,24 @@ export default function HeroSection() {
             rotateX: 0,
             duration: 1.0,
             ease: 'expo.out',
-            stagger: 0.08,
+            stagger: 0.045,
           },
-          0.45
+          0.5
         );
       }
 
-      // Sub-headline reveal
+      // Subline reveal
       tl.fromTo(
         sublineRef.current,
-        { opacity: 0, y: 16 },
+        { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 0.9, ease: 'expo.out' },
-        0.85
+        0.8
       );
 
-      // CTA buttons reveal
+      // CTA Buttons reveal
       tl.fromTo(
-        ctaRef.current?.children ?? [],
-        { opacity: 0, y: 14 },
+        ctaRef.current?.children ? Array.from(ctaRef.current.children) : [],
+        { opacity: 0, y: 16 },
         { opacity: 1, y: 0, duration: 0.8, ease: 'expo.out', stagger: 0.12 },
         1.0
       );
@@ -104,10 +104,10 @@ export default function HeroSection() {
       aria-label="Hero"
       style={{ position: 'relative', zIndex: 10 }}
     >
-      {/* Layers 2-6: Hero Brand Mark ("Control" Text + 3D Glass X) */}
+      {/* Layers 2-6: Hero Brand Mark ("Control" Text + 3D Glass X Canvas) */}
       <div className="hero-brandmark">
         <span className="hero-brandmark__text">Control</span>
-        <GlassX src="/videos/x_animation_3.mp4" />
+        <ChromaKeyVideo src="/videos/X2-trimmed.mp4" />
       </div>
 
       {/* Layer 7: Hero Text (Tagline, Headline, Subline) */}

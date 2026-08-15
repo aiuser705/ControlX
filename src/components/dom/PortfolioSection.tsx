@@ -63,23 +63,45 @@ export default function PortfolioSection() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const track = trackRef.current;
-      if (!track) return;
+      const mm = gsap.matchMedia();
 
-      // Calculate horizontal scroll distance
-      const scrollWidth = track.scrollWidth - window.innerWidth + 120;
+      // Desktop: Pinned horizontal scroll timeline (preserved completely)
+      mm.add('(min-width: 768px)', () => {
+        const track = trackRef.current;
+        if (!track) return;
 
-      // Pinned horizontal scroll timeline
-      gsap.to(track, {
-        x: -scrollWidth,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          pin: true,
-          scrub: 1,
-          end: () => `+=${scrollWidth}`,
-          invalidateOnRefresh: true,
-        },
+        const scrollWidth = track.scrollWidth - window.innerWidth + 120;
+
+        gsap.to(track, {
+          x: -scrollWidth,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            pin: true,
+            scrub: 1,
+            end: () => `+=${scrollWidth}`,
+            invalidateOnRefresh: true,
+          },
+        });
+      });
+
+      // Mobile (< 768px): Staggered natural reveal without horizontal pin lock
+      mm.add('(max-width: 767px)', () => {
+        gsap.fromTo(
+          '.portfolio-card',
+          { opacity: 0, y: 30 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            stagger: 0.12,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 80%',
+            },
+          }
+        );
       });
     }, sectionRef);
 

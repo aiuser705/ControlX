@@ -4,14 +4,16 @@ import React, { useEffect, useRef } from 'react';
 
 /**
  * GlassX — Canonical Hero Video Asset Component
- * Source Video: /videos/x_animation_3.mp4 (Master Canonical Approved Asset: "x_animation_3.mp4")
+ * Source Video: /videos/new_x.mp4 (Master Canonical Approved Asset: "NEW X")
  *
- * PRODUCTION GPU MAGENTA CHROMA KEY ENGINE:
- * 1. Precision Magenta Background Removal: Detects min(R, B) - G backdrop excess.
+ * PRODUCTION GPU MAGENTA/BERRY CHROMA KEY ENGINE:
+ * 1. Precision Background Removal: Detects min(R, B) - G backdrop excess across the dynamic lighting gradient.
  * 2. 100% Emerald Glass Protection: Preserves crystal glass body (G > max(R, B)), internal refractions,
  *    specular glints, and surface reflections without color tinting or edge damage.
- * 3. Sub-Pixel Edge Despill: Eliminates magenta fringe on transparent edge boundaries.
- * 4. Dual-Buffer Seamless Looper: Auto-calculates duration and loops crossfade dynamically.
+ * 3. Specular Highlight Protection: Preserves bright white optical glints (min(R, G, B) > 0.55).
+ * 4. Total Edge Despill: Eliminates all magenta/pink fringe and edge halos on rotating rings and glass edges.
+ * 5. Premultiplied Alpha Blending: Guarantees 100% transparent zero-noise backdrop on WebGL canvas.
+ * 6. Dual-Buffer Seamless Looper: Auto-calculates duration and loops crossfade dynamically.
  */
 
 interface GlassXProps {
@@ -39,42 +41,45 @@ const FRAGMENT_SHADER_SOURCE = `
   uniform sampler2D u_textureB;
   uniform float u_crossfade; // 0.0 = full A, 1.0 = full B
 
-  // Production GPU Magenta Chroma Keyer for x_animation_3.mp4
-  vec4 processMagentaChromaKey(vec4 color) {
+  // Production GPU Chroma Keyer for new X.mp4
+  vec4 processChromaKey(vec4 color) {
     vec3 rgb = color.rgb;
 
     // Magenta Excess Metric: min(R, B) - G
     float minRB = min(rgb.r, rgb.b);
     float maxRB = max(rgb.r, rgb.b);
-    float magentaExcess = minRB - rgb.g;
+    float excess = minRB - rgb.g;
 
-    // 1. Pure Magenta Backdrop Match (Red and Blue are high, Green is low)
-    float magMatch = smoothstep(0.02, 0.15, magentaExcess);
+    // 1. Magenta Backdrop Match
+    float bgMatch = smoothstep(0.04, 0.11, excess);
 
     // 2. Emerald Glass Preservation Protection (Green dominance: G > max(R, B))
-    float emeraldProtection = smoothstep(0.02, 0.10, rgb.g - maxRB);
+    float greenProtection = smoothstep(0.00, 0.04, rgb.g - maxRB);
 
-    // 3. Final Adaptive Alpha Calculation
-    float alpha = 1.0 - magMatch * (1.0 - emeraldProtection);
+    // 3. Specular Glint Protection (Pure bright white glints and flares)
+    float brightProtection = smoothstep(0.55, 0.80, min(min(rgb.r, rgb.g), rgb.b));
+    float totalProtection = max(greenProtection, brightProtection);
 
-    // Matte cleanup curve for clean sub-pixel edge feathering
-    alpha = smoothstep(0.02, 0.95, alpha);
+    // 4. Final Adaptive Alpha Calculation
+    float alpha = 1.0 - bgMatch * (1.0 - totalProtection);
+    alpha = smoothstep(0.01, 0.98, alpha);
 
-    // 4. Sub-Pixel Anti-Aliased Edge Magenta Despill
-    float edgeSpillWeight = (1.0 - alpha) * smoothstep(0.02, 0.90, alpha);
-    float despillAmount = max(0.0, magentaExcess) * edgeSpillWeight * 0.85;
-    rgb.r -= despillAmount;
-    rgb.b -= despillAmount;
+    // 5. Total Edge Despill (Eliminates all pink/magenta halo around glass rings)
+    float despill = max(0.0, excess) * (1.0 - greenProtection);
+    rgb.r = clamp(rgb.r - despill, 0.0, 1.0);
+    rgb.b = clamp(rgb.b - despill, 0.0, 1.0);
 
-    return vec4(rgb, color.a * alpha);
+    // Premultiply RGB by calculated alpha for clean WebGL canvas alpha blending
+    float finalAlpha = color.a * alpha;
+    return vec4(rgb * finalAlpha, finalAlpha);
   }
 
   void main() {
     vec4 colA = texture2D(u_textureA, v_texCoord);
     vec4 colB = texture2D(u_textureB, v_texCoord);
 
-    vec4 keyedA = processMagentaChromaKey(colA);
-    vec4 keyedB = processMagentaChromaKey(colB);
+    vec4 keyedA = processChromaKey(colA);
+    vec4 keyedB = processChromaKey(colB);
 
     // Dynamic seamless loop crossfade
     gl_FragColor = mix(keyedA, keyedB, u_crossfade);
@@ -82,7 +87,7 @@ const FRAGMENT_SHADER_SOURCE = `
 `;
 
 export default function GlassX({
-  src = '/videos/x_animation_3.mp4',
+  src = '/videos/new_x.mp4',
   className = '',
 }: GlassXProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -102,12 +107,15 @@ export default function GlassX({
     const gl = canvas.getContext('webgl', {
       alpha: true,
       antialias: true,
-      premultipliedAlpha: false,
+      premultipliedAlpha: true,
     });
     if (!gl) {
       console.warn('WebGL context unavailable');
       return;
     }
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
     // 1. Compile Shaders
     const createShader = (type: number, source: string) => {
@@ -158,9 +166,6 @@ export default function GlassX({
 
     const aPosition = gl.getAttribLocation(program, 'a_position');
     const aTexCoord = gl.getAttribLocation(program, 'a_texCoord');
-    const uTextureA = gl.getUniformLocation(program, 'u_textureA');
-    const uTextureB = gl.getUniformLocation(program, 'u_textureB');
-    const uCrossfade = gl.getUniformLocation(program, 'u_crossfade');
 
     gl.enableVertexAttribArray(aPosition);
     gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 16, 0);
@@ -168,8 +173,12 @@ export default function GlassX({
     gl.enableVertexAttribArray(aTexCoord);
     gl.vertexAttribPointer(aTexCoord, 2, gl.FLOAT, false, 16, 8);
 
-    // 3. WebGL Textures
-    const createGLTexture = () => {
+    const uTextureA = gl.getUniformLocation(program, 'u_textureA');
+    const uTextureB = gl.getUniformLocation(program, 'u_textureB');
+    const uCrossfade = gl.getUniformLocation(program, 'u_crossfade');
+
+    // 3. Create Textures
+    const createVideoTexture = () => {
       const tex = gl.createTexture();
       gl.bindTexture(gl.TEXTURE_2D, tex);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -179,23 +188,23 @@ export default function GlassX({
       return tex;
     };
 
-    const textureA = createGLTexture();
-    const textureB = createGLTexture();
+    const textureA = createVideoTexture();
+    const textureB = createVideoTexture();
 
-    // 4. Dual HTML Video Players for Dynamic Seamless Looping
-    const createVideoPlayer = () => {
+    // 4. Setup Dual Video Loop Elements
+    const createVideo = () => {
       const v = document.createElement('video');
       v.src = src;
-      v.autoplay = false;
+      v.crossOrigin = 'anonymous';
       v.loop = false;
       v.muted = true;
       v.playsInline = true;
-      v.crossOrigin = 'anonymous';
+      v.preload = 'auto';
       return v;
     };
 
-    const videoA = createVideoPlayer();
-    const videoB = createVideoPlayer();
+    const videoA = createVideo();
+    const videoB = createVideo();
 
     let duration = 10.0;
     let crossfadeDuration = 0.5;
@@ -272,7 +281,7 @@ export default function GlassX({
       const blendFactor = activePlayer === 'A' ? crossfadeProgress : 1.0 - crossfadeProgress;
       gl.uniform1f(uCrossfade, blendFactor);
 
-      // Render Quad
+      // Render Quad with transparent background
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -347,33 +356,31 @@ export default function GlassX({
       if (shadowRef.current) {
         const shadowX = -cp.x * 14;
         shadowRef.current.style.transform = `translateX(-50%) translateX(${shadowX}px)`;
-        shadowRef.current.style.opacity = `${0.40 + (1 - cp.dist) * 0.12}`;
+        shadowRef.current.style.opacity = `${0.35 + (1 - cp.dist) * 0.10}`;
       }
 
-      // Specular Highlight Movement (Layer 5)
+      // Specular Highlight Dynamic Follow (Layer 5)
       if (highlightRef.current) {
-        const sheenX = 50 + cp.x * 35;
-        const sheenY = 50 + cp.y * 35;
+        const sheenIntensity = 0.50 + (1 - cp.dist) * 0.30;
         highlightRef.current.style.background = `
           radial-gradient(
-            circle at ${sheenX}% ${sheenY}%,
-            rgba(255, 255, 255, 0.35) 0%,
-            rgba(168, 240, 212, 0.15) 40%,
+            circle at ${50 + cp.x * 25}% ${45 + cp.y * 25}%,
+            rgba(255, 255, 255, ${0.40 * sheenIntensity}) 0%,
+            rgba(168, 240, 212, ${0.20 * sheenIntensity}) 35%,
             transparent 70%
           )
         `;
       }
 
-      // Cursor Proximity Glow (Layer 6)
+      // Proximity Glow Ring (Layer 6)
       if (glowRef.current) {
-        const glowX = 50 + cp.x * 30;
-        const glowY = 50 + cp.y * 30;
+        const glowOpacity = (1 - cp.dist) * 0.45;
         glowRef.current.style.background = `
           radial-gradient(
-            circle at ${glowX}% ${glowY}%,
-            rgba(15, 130, 89, 0.30) 0%,
-            rgba(168, 240, 212, 0.12) 50%,
-            transparent 80%
+            circle at ${50 + cp.x * 15}% ${50 + cp.y * 15}%,
+            rgba(15, 130, 89, ${0.20 * glowOpacity}) 0%,
+            rgba(77, 248, 186, ${0.10 * glowOpacity}) 45%,
+            transparent 70%
           )
         `;
       }
@@ -382,21 +389,33 @@ export default function GlassX({
     animatePhysics();
 
     return () => {
-      cancelAnimationFrame(rafId);
       window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(rafId);
     };
   }, []);
 
   return (
-    <div className={`glass-x-scene ${className}`} aria-label="Hero Glass X Video Experience">
-      {/* 3D Interactive Outer Container Wrapper */}
+    <div
+      className={`glass-x-wrapper ${className}`}
+      style={{
+        position: 'relative',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        maxWidth: '560px',
+        aspectRatio: '16 / 9',
+        margin: '0 auto',
+      }}
+    >
+      {/* Tilt & Physics Container */}
       <div
         ref={containerRef}
-        className="glass-x-wrapper"
+        className="glass-x-container"
         style={{
+          position: 'relative',
           width: '100%',
           height: '100%',
-          position: 'relative',
           transformStyle: 'preserve-3d',
           willChange: 'transform',
         }}
@@ -413,7 +432,7 @@ export default function GlassX({
             transform: 'translateX(-50%)',
             width: '240px',
             height: '24px',
-            background: 'radial-gradient(ellipse at center, rgba(10, 45, 30, 0.35) 0%, rgba(15, 130, 89, 0.12) 50%, transparent 80%)',
+            background: 'radial-gradient(ellipse at center, rgba(10, 45, 30, 0.28) 0%, rgba(15, 130, 89, 0.08) 50%, transparent 80%)',
             filter: 'blur(8px)',
             pointerEvents: 'none',
             zIndex: 2,
@@ -421,7 +440,7 @@ export default function GlassX({
           }}
         />
 
-        {/* Layer 3: Hero X Video WebGL Canvas (x_animation_3.mp4 GPU Magenta Chroma Keyed Asset) */}
+        {/* Layer 3: Hero X Video WebGL Canvas (NEW X GPU Chroma Keyed Asset) */}
         <canvas
           ref={canvasRef}
           width={1280}
@@ -447,7 +466,7 @@ export default function GlassX({
             transform: 'translateX(-50%)',
             width: '200px',
             height: '20px',
-            background: 'radial-gradient(ellipse at center, rgba(15, 130, 89, 0.38) 0%, rgba(168, 240, 212, 0.18) 45%, transparent 75%)',
+            background: 'radial-gradient(ellipse at center, rgba(15, 130, 89, 0.25) 0%, rgba(168, 240, 212, 0.12) 45%, transparent 75%)',
             filter: 'blur(5px)',
             pointerEvents: 'none',
             zIndex: 4,

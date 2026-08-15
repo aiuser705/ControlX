@@ -523,6 +523,7 @@ export default function ProcessSection() {
   const cardRef = useRef<HTMLDivElement>(null);
   const bubbleGroupRef = useRef<SVGGElement>(null);
   const animFrameRef = useRef<number | null>(null);
+  const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const [activeNode, setActiveNode] = useState(4); // Default Step 05 (Development) active
   const [activeTechTag, setActiveTechTag] = useState(1);
@@ -534,6 +535,14 @@ export default function ProcessSection() {
   // Smooth GSAP Card Transition
   const handleSelectNode = (index: number) => {
     if (index === activeNode) return;
+
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      nodeRefs.current[index]?.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest',
+      });
+    }
 
     if (cardRef.current) {
       gsap.to(cardRef.current, {
@@ -756,6 +765,7 @@ export default function ProcessSection() {
               return (
                 <div
                   key={step.id}
+                  ref={(el) => { nodeRefs.current[index] = el; }}
                   className={`node-disc-item ${isActive ? 'node-disc-item--active' : ''} ${isPast ? 'node-disc-item--past' : ''}`}
                   onClick={() => handleSelectNode(index)}
                   onMouseEnter={() => handleSelectNode(index)}

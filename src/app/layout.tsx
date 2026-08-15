@@ -3,10 +3,8 @@ import '@/styles/globals.css';
 
 export const metadata: Metadata = {
   title: 'Control X — Luxury Digital Web Application',
-  description: 'An interactive benchmark for high-end digital agency platforms synthesizing editorial typography with real-time physical WebGL optics.',
-  icons: {
-    icon: '/favicon.ico',
-  },
+  description:
+    'An interactive benchmark for high-end digital agency platforms synthesizing editorial typography with real-time physical WebGL optics.',
 };
 
 export default function RootLayout({
