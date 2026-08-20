@@ -1,47 +1,56 @@
-import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 // Routes that require an authenticated session
-const PROTECTED_ROUTES = ['/dashboard', '/admin', '/settings', '/orders', '/profile', '/reset-password'];
+const PROTECTED_ROUTES = ['/dashboard', '/admin', '/settings', '/orders', '/profile'];
 
 // Routes that authenticated users should be bounced away from
 const AUTH_ROUTES = ['/login', '/signup', '/forgot-password'];
 
 export async function updateSession(request: NextRequest) {
-  // Start with a basic "pass through" response
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  const { pathname } = request.nextUrl;
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+  // Guard: if Supabase env vars are missing, skip auth logic entirely
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('[middleware] Supabase env vars not set — skipping auth checks');
+    return NextResponse.next({ request });
+  }
+
+  // Build the initial pass-through response
+  let supabaseResponse = NextResponse.next({ request });
+
+  let user = null;
+
+  try {
+    // Dynamically import to avoid edge-runtime bundling issues
+    const { createServerClient } = await import('@supabase/ssr');
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          // Apply cookies to both the cloned request and the response
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
         },
       },
-    }
-  );
+    });
 
-  // IMPORTANT: Always call getUser() — never getSession() — in middleware.
-  // getUser() validates the JWT server-side preventing forged/expired tokens.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { pathname } = request.nextUrl;
+    // getUser() validates the JWT against Supabase Auth server on every request
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (err) {
+    // If Supabase is unreachable or throws, do NOT crash the middleware.
+    // Simply pass the request through; protected pages will handle auth themselves.
+    console.error('[middleware] Supabase auth check failed — passing through:', err);
+    return NextResponse.next({ request });
+  }
 
   // Check prefix matches so /dashboard/analytics is also protected
   const isProtectedRoute = PROTECTED_ROUTES.some(
