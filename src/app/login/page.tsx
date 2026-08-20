@@ -2,7 +2,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import LoginCatStage, { CatState } from '@/components/dom/LoginCatStage';
+import { createClient } from '@/lib/supabase/client';
 import styles from './login.module.css';
 
 export interface LoginFormProps {
@@ -10,6 +13,8 @@ export interface LoginFormProps {
 }
 
 function LoginForm({ onLogin }: LoginFormProps) {
+  const router = useRouter();
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isMasked, setIsMasked] = useState(true);
@@ -17,6 +22,7 @@ function LoginForm({ onLogin }: LoginFormProps) {
 
   const [catState, setCatState] = useState<CatState>('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const [successNotice, setSuccessNotice] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -109,6 +115,17 @@ function LoginForm({ onLogin }: LoginFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
+    setSuccessNotice('');
+
+    if (!email || !email.includes('@')) {
+      setErrorMsg('Please enter a valid email address.');
+      setCatState('error');
+      if (errorResetTimerRef.current) clearTimeout(errorResetTimerRef.current);
+      errorResetTimerRef.current = setTimeout(() => {
+        setCatState('idle');
+      }, 1500);
+      return;
+    }
 
     if (password.length === 0) {
       setErrorMsg('Please enter your password.');
@@ -120,34 +137,92 @@ function LoginForm({ onLogin }: LoginFormProps) {
       return;
     }
 
+    if (mode === 'signup' && password.length < 6) {
+      setErrorMsg('Password must be at least 6 characters.');
+      setCatState('error');
+      if (errorResetTimerRef.current) clearTimeout(errorResetTimerRef.current);
+      errorResetTimerRef.current = setTimeout(() => {
+        setCatState('idle');
+      }, 1500);
+      return;
+    }
+
     setIsLoading(true);
+    const supabase = createClient();
 
-    // 500ms auth simulation / hook
-    setTimeout(async () => {
+    // ── SIGNUP FLOW ──────────────────────────────────────────────────────────
+    if (mode === 'signup') {
+      const { data: signupData, error: signupError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            role: 'user',
+          },
+        },
+      });
+
       setIsLoading(false);
-      let success = false;
 
-      if (onLogin) {
-        success = await onLogin(email, password);
-      } else {
-        // Default placeholder auth check
-        const DEMO_PASSWORD = 'controlx123';
-        success = password === DEMO_PASSWORD;
-      }
-
-      if (!success) {
-        setErrorMsg('Incorrect password. Please try again.');
+      if (signupError) {
+        console.error('[Signup Error] Supabase signup failed:', signupError.message, signupError);
+        setErrorMsg(signupError.message || 'Failed to create account. Please try again.');
         setCatState('error');
         if (errorResetTimerRef.current) clearTimeout(errorResetTimerRef.current);
         errorResetTimerRef.current = setTimeout(() => {
           setCatState(isMasked ? 'hidden' : 'visible');
         }, 1500);
-      } else {
-        setErrorMsg('');
-        setIsSuccess(true);
-        setCatState('success');
+        return;
       }
-    }, 500);
+
+      console.log('[Signup Success] User registered:', signupData.user?.id);
+
+      // If email confirmation is enabled, user exists but no active session yet
+      if (signupData.user && !signupData.session) {
+        setIsSuccess(false);
+        setCatState('success');
+        setSuccessNotice(
+          'Signup successful! Please check your email to verify your account before logging in.'
+        );
+        return;
+      }
+
+      // Auto-authenticated upon signup
+      setErrorMsg('');
+      setIsSuccess(true);
+      setCatState('success');
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1500);
+      return;
+    }
+
+    // ── LOGIN FLOW ───────────────────────────────────────────────────────────
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+
+    setIsLoading(false);
+
+    if (authError) {
+      console.error('[Login Error] Supabase login failed:', authError.message, authError);
+      setErrorMsg(authError.message || 'Invalid email or password.');
+      setCatState('error');
+      if (errorResetTimerRef.current) clearTimeout(errorResetTimerRef.current);
+      errorResetTimerRef.current = setTimeout(() => {
+        setCatState(isMasked ? 'hidden' : 'visible');
+      }, 1500);
+      return;
+    }
+
+    // Auth succeeded — play success animation, then redirect
+    setErrorMsg('');
+    setIsSuccess(true);
+    setCatState('success');
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 1500);
   };
 
   return (
@@ -175,13 +250,37 @@ function LoginForm({ onLogin }: LoginFormProps) {
               <LoginCatStage state={catState} />
 
               <h2 className={styles.title}>
-                {isSuccess ? 'Welcome Aboard!' : 'Log in'}
+                {isSuccess
+                  ? 'Welcome Aboard!'
+                  : mode === 'signup'
+                  ? 'Create Account'
+                  : 'Log in'}
               </h2>
               <div className={styles.subtitle}>
                 {isSuccess
                   ? 'Redirecting to your executive dashboard...'
+                  : mode === 'signup'
+                  ? 'Enter your details to create your Control X account'
                   : 'Enter your credentials to access Control X'}
               </div>
+
+              {successNotice && (
+                <div
+                  style={{
+                    background: 'rgba(16, 185, 129, 0.12)',
+                    border: '1px solid rgba(16, 185, 129, 0.35)',
+                    borderRadius: '10px',
+                    padding: '14px 16px',
+                    color: '#10B981',
+                    fontSize: '13px',
+                    lineHeight: 1.5,
+                    margin: '12px 0 16px',
+                    textAlign: 'center',
+                  }}
+                >
+                  ✓ {successNotice}
+                </div>
+              )}
 
               {isSuccess ? (
                 <div style={{ textAlign: 'center', padding: '20px 0' }}>
@@ -205,10 +304,14 @@ function LoginForm({ onLogin }: LoginFormProps) {
                     Authentication Successful
                   </p>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
+                      const supabase = createClient();
+                      await supabase.auth.signOut();
                       setIsSuccess(false);
+                      setEmail('');
                       setPassword('');
                       setErrorMsg('');
+                      setSuccessNotice('');
                       setCatState('idle');
                     }}
                     style={{
@@ -239,6 +342,7 @@ function LoginForm({ onLogin }: LoginFormProps) {
                         onFocus={handleEmailFocus}
                         onBlur={handleEmailBlur}
                         placeholder="name@company.com"
+                        disabled={isLoading}
                       />
                       <div className={styles.iconLeft}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -262,6 +366,7 @@ function LoginForm({ onLogin }: LoginFormProps) {
                         onFocus={handlePasswordFocus}
                         onBlur={handlePasswordBlur}
                         placeholder="••••••••"
+                        disabled={isLoading}
                       />
                       <div className={styles.iconLeft}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -282,22 +387,32 @@ function LoginForm({ onLogin }: LoginFormProps) {
 
                   {errorMsg && <div className={styles.errorMsg}>{errorMsg}</div>}
 
-                  <div className={styles.rowBetween}>
-                    <label className={styles.remember}>
-                      <input
-                        type="checkbox"
-                        checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}
-                      />
-                      Remember me
-                    </label>
-                    <a className={styles.forgot} href="#forgot">
-                      Forgot password?
-                    </a>
-                  </div>
+                  {mode === 'login' && (
+                    <div className={styles.rowBetween}>
+                      <label className={styles.remember}>
+                        <input
+                          type="checkbox"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                        />
+                        Remember me
+                      </label>
+                      <Link className={styles.forgot} href="/forgot-password">
+                        Forgot password?
+                      </Link>
+                    </div>
+                  )}
 
                   <button type="submit" className={styles.loginBtn} id="loginBtn" disabled={isLoading}>
-                    {isLoading ? 'Checking...' : isSuccess ? 'Welcome back! ✓' : 'Sign In'}
+                    {isLoading
+                      ? mode === 'signup'
+                        ? 'Creating Account...'
+                        : 'Checking...'
+                      : isSuccess
+                      ? 'Welcome back! ✓'
+                      : mode === 'signup'
+                      ? 'Create Account'
+                      : 'Sign In'}
                     {!isLoading && !isSuccess && (
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <line x1="5" y1="12" x2="19" y2="12" />
@@ -330,8 +445,57 @@ function LoginForm({ onLogin }: LoginFormProps) {
                   </div>
 
                   <div className={styles.signup}>
-                    Don&apos;t have an account?{' '}
-                    <a href="#signup">Sign up now</a>
+                    {mode === 'login' ? (
+                      <>
+                        Don&apos;t have an account?{' '}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMode('signup');
+                            setErrorMsg('');
+                            setSuccessNotice('');
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--green-deep)',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            padding: 0,
+                            fontFamily: 'inherit',
+                            fontSize: 'inherit',
+                            textDecoration: 'underline',
+                          }}
+                        >
+                          Sign up now
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        Already have an account?{' '}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMode('login');
+                            setErrorMsg('');
+                            setSuccessNotice('');
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--green-deep)',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            padding: 0,
+                            fontFamily: 'inherit',
+                            fontSize: 'inherit',
+                            textDecoration: 'underline',
+                          }}
+                        >
+                          Log in
+                        </button>
+                      </>
+                    )}
                   </div>
                 </form>
               )}
@@ -346,4 +510,3 @@ function LoginForm({ onLogin }: LoginFormProps) {
 export default function LoginPage() {
   return <LoginForm />;
 }
-

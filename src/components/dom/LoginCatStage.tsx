@@ -43,7 +43,7 @@ export default function LoginCatStage({ state }: LoginCatStageProps) {
 
   const currentState = internalOverride || state;
 
-  const stopBreathe = () => {
+  const stopBreathe = React.useCallback(() => {
     if (breatheTweenRef.current) {
       breatheTweenRef.current.kill();
       breatheTweenRef.current = null;
@@ -51,9 +51,9 @@ export default function LoginCatStage({ state }: LoginCatStageProps) {
     if (stageRef.current) {
       gsap.set(stageRef.current, { scale: 1, rotation: 0, x: 0, y: 0 });
     }
-  };
+  }, []);
 
-  const startBreathe = () => {
+  const startBreathe = React.useCallback(() => {
     stopBreathe();
     if (stageRef.current) {
       breatheTweenRef.current = gsap.to(stageRef.current, {
@@ -65,7 +65,7 @@ export default function LoginCatStage({ state }: LoginCatStageProps) {
         transformOrigin: '50% 100%',
       });
     }
-  };
+  }, [stopBreathe]);
 
   // Synchronize state changes & GSAP animations
   useEffect(() => {
@@ -90,7 +90,7 @@ export default function LoginCatStage({ state }: LoginCatStageProps) {
         .to(stageRef.current, { scale: 1.08, y: -8, duration: 0.28, ease: 'power2.out', transformOrigin: '50% 100%' })
         .to(stageRef.current, { scale: 1, y: 0, duration: 0.4, ease: 'elastic.out(1, 0.55)' });
     }
-  }, [currentState]);
+  }, [currentState, startBreathe, stopBreathe]);
 
   // Teasing random blink timer when in idle state
   useEffect(() => {

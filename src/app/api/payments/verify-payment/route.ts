@@ -1,0 +1,229 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createAdminClient } from '@/lib/supabase/server';
+import { sendBookingConfirmation } from '@/lib/email';
+import { sendAdminNotifications } from '@/lib/notifications';
+
+/**
+ * POST /api/payments/verify-payment
+ *
+ * Verifies a Cashfree payment order status directly against Cashfree Sandbox API,
+ * updates the database state machine, and triggers confirmation email once.
+ */
+export async function POST(req: NextRequest) {
+  // ── 0. Diagnostic Logging for Environment Variables ───────────────────────
+  console.log('Using App ID:', process.env.CASHFREE_APP_ID?.slice(0, 8) + '...');
+
+  try {
+    const body = await req.json().catch(() => ({}));
+    const orderId = body.orderId || body.order_id;
+
+    if (!orderId || typeof orderId !== 'string') {
+      return NextResponse.json(
+        { success: false, error: 'Missing orderId parameter.' },
+        { status: 400 }
+      );
+    }
+
+    const CF_APP_ID = process.env.CASHFREE_APP_ID;
+    const CF_SECRET_KEY = process.env.CASHFREE_SECRET_KEY;
+    const baseUrl = process.env.CASHFREE_BASE_URL ?? 'https://sandbox.cashfree.com/pg';
+    const CF_API_VERSION = '2023-08-01';
+
+    if (!CF_APP_ID || !CF_SECRET_KEY) {
+      console.error('[verify-payment] Missing Cashfree API credentials in environment.');
+      return NextResponse.json(
+        { success: false, error: 'Payment gateway configuration missing.' },
+        { status: 500 }
+      );
+    }
+
+    const supabase = createAdminClient();
+
+    // ── 1. Check Database for Existing Booking Record ───────────────────────
+    const { data: booking, error: dbFetchError } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('cashfree_order_id', orderId)
+      .maybeSingle();
+
+    if (dbFetchError) {
+      console.warn('[verify-payment] Database lookup note:', dbFetchError.message);
+    }
+
+    // Fast-path: If already confirmed in DB, return immediately
+    if (booking && booking.status === 'confirmed') {
+      console.log(`[verify-payment] Order ${orderId} is already CONFIRMED in database.`);
+      return NextResponse.json({
+        success: true,
+        status: 'confirmed',
+        booking: {
+          id: booking.id,
+          service_name: booking.service_name,
+          amount: booking.amount,
+          currency: booking.currency,
+          customer_name: booking.customer_name,
+          customer_email: booking.customer_email,
+          customer_phone: booking.customer_phone,
+          cashfree_order_id: booking.cashfree_order_id,
+        },
+      });
+    }
+
+    // ── 2. Query Cashfree Orders API Directly ───────────────────────────────
+    const fetchUrl = `${baseUrl}/orders/${encodeURIComponent(orderId)}`;
+    console.log(`Verifying order: ${orderId} at URL: ${baseUrl}`);
+    console.log(`[verify-payment] Requesting: GET ${fetchUrl}`);
+
+    const response = await fetch(fetchUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'x-client-id': CF_APP_ID,
+        'x-client-secret': CF_SECRET_KEY,
+        'x-api-version': CF_API_VERSION,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Cashfree Verification Failed:', response.status, errorText);
+      return NextResponse.json(
+        {
+          success: false,
+          status: 'failed',
+          error: 'Cashfree verification failed',
+          details: errorText,
+        },
+        { status: response.status }
+      );
+    }
+
+    const cfOrder = await response.json();
+    const rawStatus = (cfOrder.order_status as string || '').toUpperCase();
+    console.log(`[verify-payment] Cashfree returned raw order_status: ${rawStatus}`);
+
+    let mappedStatus: 'confirmed' | 'failed' | 'cancelled' | 'pending_payment' = 'pending_payment';
+
+    switch (rawStatus) {
+      case 'PAID':
+        mappedStatus = 'confirmed';
+        break;
+      case 'EXPIRED':
+      case 'TERMINATED':
+      case 'FAILED':
+        mappedStatus = 'failed';
+        break;
+      case 'CANCELLED':
+      case 'USER_DROPPED':
+        mappedStatus = 'cancelled';
+        break;
+      case 'ACTIVE':
+      default:
+        mappedStatus = 'pending_payment';
+        break;
+    }
+
+    // ── 3. Authoritative Database State Update & Email Dispatch ──────────────
+    if (booking?.id) {
+      // [1] — Log before DB update
+      console.log(`[1. Verify] Cashfree status is ${rawStatus}. Mapping to: ${mappedStatus}. Updating DB...`);
+
+      const updatePayload: Record<string, any> = { status: mappedStatus };
+
+      if (mappedStatus === 'confirmed' && !booking.email_sent) {
+        // [3] — Log before email trigger
+        console.log('[3. Verify] Calling sendBookingConfirmation function...');
+        try {
+          const emailSuccess = await sendBookingConfirmation({
+            customerEmail: booking.customer_email,
+            customerName: booking.customer_name,
+            serviceName: booking.service_name,
+            amount: booking.amount,
+            currency: booking.currency,
+            bookingId: booking.id,
+            orderId: booking.cashfree_order_id,
+          });
+
+          if (emailSuccess) {
+            updatePayload.email_sent = true;
+          } else {
+            console.error('[verify-payment] Confirmation email delivery failed. email_sent remains false.');
+          }
+        } catch (emailErr) {
+          console.error('[verify-payment] Non-fatal email error:', emailErr);
+        }
+
+        // Admin notifications (Telegram + Admin Email) — non-blocking
+        try {
+          await sendAdminNotifications({ booking });
+        } catch (notifyErr) {
+          console.error('[verify-payment] Non-fatal error during admin notifications:', notifyErr);
+        }
+      }
+
+      const { error: updateError } = await supabase
+        .from('bookings')
+        .update(updatePayload)
+        .eq('id', booking.id);
+
+      if (updateError) {
+        console.error('[verify-payment] Error updating booking status in DB:', updateError.message);
+      } else {
+        console.log(`[verify-payment] DB booking ${booking.id} updated to status=${mappedStatus}`);
+      }
+
+      // [2] — Re-fetch the row to confirm what email_sent is after the update
+      const { data: updatedBooking } = await supabase
+        .from('bookings')
+        .select('email_sent')
+        .eq('id', booking.id)
+        .maybeSingle();
+      console.log(`[2. Verify] DB updated. email_sent flag is now: ${updatedBooking?.email_sent}`);
+
+      // --- ADD THIS BLOCK AFTER YOUR DATABASE SAVE ---
+      if (mappedStatus === 'confirmed' && process.env.SUPABASE_EDGE_FUNCTION_URL) {
+        try {
+          await fetch(process.env.SUPABASE_EDGE_FUNCTION_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Internal-Secret': process.env.INTERNAL_WEBHOOK_SECRET || '',
+            },
+            body: JSON.stringify({ booking_id: booking.id }), // Ensure 'booking.id' matches your variable name
+          });
+        } catch (notifyError) {
+          console.error("Failed to send Telegram notification:", notifyError);
+          // We do NOT throw an error here. The payment is still successful even if Telegram is down.
+        }
+      }
+      // -----------------------------------------------
+    }
+
+    return NextResponse.json({
+      success: true,
+      status: mappedStatus,
+      raw_status: rawStatus,
+      booking: {
+        id: booking?.id || cfOrder.order_id || orderId,
+        service_name: booking?.service_name || '1-Hour Executive Consultation',
+        amount: booking?.amount || cfOrder.order_amount || 5000,
+        currency: booking?.currency || cfOrder.order_currency || 'INR',
+        customer_name: booking?.customer_name || cfOrder.customer_details?.customer_name || 'Customer',
+        customer_email: booking?.customer_email || cfOrder.customer_details?.customer_email || '',
+        customer_phone: booking?.customer_phone || cfOrder.customer_details?.customer_phone || '',
+        cashfree_order_id: cfOrder.order_id || orderId,
+      },
+    });
+  } catch (err: any) {
+    console.error('Internal Server Error in verify-payment:', err);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Internal Server Error',
+        details: err?.message || String(err),
+      },
+      { status: 500 }
+    );
+  }
+}
