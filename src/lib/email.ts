@@ -148,7 +148,7 @@ export async function sendBookingConfirmation({
                         </p>
 
                         <div style="text-align: center;">
-                          <a href="https://controlx.io/dashboard"
+                          <a href="https://controlx.io/account"
                              style="display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #0F8259 0%, #10B981 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.03em;">
                             View in Dashboard
                           </a>

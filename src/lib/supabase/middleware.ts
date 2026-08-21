@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 // Routes that require an authenticated session
-const PROTECTED_ROUTES = ['/dashboard', '/admin', '/settings', '/orders', '/profile'];
+const PROTECTED_ROUTES = ['/account', '/admin', '/settings', '/orders', '/profile', '/reset-password'];
 
 // Routes that authenticated users should be bounced away from
 const AUTH_ROUTES = ['/login', '/signup', '/forgot-password'];
@@ -52,7 +52,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
-  // Check prefix matches so /dashboard/analytics is also protected
+  // Check prefix matches so /account/settings is also protected
   const isProtectedRoute = PROTECTED_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
@@ -68,12 +68,12 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // 2. Authenticated user hitting an auth route → send to /dashboard
+  // 2. Authenticated user hitting an auth route → send to /account
   if (user && isAuthRoute) {
-    const dashboardUrl = request.nextUrl.clone();
-    dashboardUrl.pathname = '/dashboard';
-    dashboardUrl.search = '';
-    return NextResponse.redirect(dashboardUrl);
+    const accountUrl = request.nextUrl.clone();
+    accountUrl.pathname = '/account';
+    accountUrl.search = '';
+    return NextResponse.redirect(accountUrl);
   }
 
   // 3. All other requests — allow through with refreshed session cookies

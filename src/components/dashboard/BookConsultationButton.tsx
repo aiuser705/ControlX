@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 declare global {
   interface Window {
@@ -32,14 +32,37 @@ async function loadCashfreeSDK() {
   return window.Cashfree!({ mode: CF_SDK_MODE });
 }
 
-export default function BookConsultationButton() {
+interface BookConsultationButtonProps {
+  defaultName?: string;
+  defaultEmail?: string;
+  defaultPhone?: string;
+  customTriggerLabel?: string;
+  badgeLabel?: string;
+  description?: string;
+}
+
+export default function BookConsultationButton({
+  defaultName = '',
+  defaultEmail = '',
+  defaultPhone = '',
+  customTriggerLabel,
+  badgeLabel = '1-Hour Executive Strategy Call',
+  description = 'Direct 1-on-1 strategy consultation with Control X leadership. Immediate scheduling priority & dedicated roadmap discussion.',
+}: BookConsultationButtonProps) {
   const [showModal, setShowModal] = useState(false);
-  const [customerName, setCustomerName] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerName, setCustomerName] = useState(defaultName);
+  const [customerEmail, setCustomerEmail] = useState(defaultEmail);
+  const [customerPhone, setCustomerPhone] = useState(defaultPhone);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Keep state synced if props arrive async
+  useEffect(() => {
+    if (defaultName) setCustomerName(defaultName);
+    if (defaultEmail) setCustomerEmail(defaultEmail);
+    if (defaultPhone) setCustomerPhone(defaultPhone);
+  }, [defaultName, defaultEmail, defaultPhone]);
 
   const handleOpenForm = () => {
     setError('');
@@ -104,7 +127,7 @@ export default function BookConsultationButton() {
         paymentSessionId: data.session_id,
         redirectTarget: '_self', // full-page redirect to return_url on completion
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[BookConsultation] Checkout error:', err);
       setError('Something went wrong during checkout initialization. Please try again.');
       setIsLoading(false);
@@ -116,19 +139,17 @@ export default function BookConsultationButton() {
       <div style={cardStyle}>
         {/* Icon & Title */}
         <div style={headerRowStyle}>
-          <div style={iconBadgeStyle}>🗓</div>
+          <div style={iconBadgeStyle}>⚡</div>
           <div>
-            <h3 style={titleStyle}>1-Hour Executive Consultation</h3>
-            <p style={descStyle}>
-              Private strategy session with Control X leadership. Brand architecture & digital systems roadmap.
-            </p>
+            <h3 style={titleStyle}>{badgeLabel}</h3>
+            <p style={descStyle}>{description}</p>
           </div>
         </div>
 
         {/* Pricing */}
         <div style={priceRowStyle}>
           <span style={priceStyle}>{CONSULTATION_DISPLAY_PRICE}</span>
-          <span style={priceLabelStyle}>/ session · Guaranteed 1-on-1</span>
+          <span style={priceLabelStyle}>/ session · Guaranteed 1-on-1 · Priority Queue</span>
         </div>
 
         {/* Trigger Button or Expanded Form */}
@@ -138,12 +159,12 @@ export default function BookConsultationButton() {
             style={btnPrimaryStyle}
             id="openBookingFormBtn"
           >
-            Book Consultation — {CONSULTATION_DISPLAY_PRICE}
+            {customTriggerLabel || `Book Priority Call — ${CONSULTATION_DISPLAY_PRICE}`}
           </button>
         ) : (
           <form onSubmit={handlePay} style={formStyle}>
             <div style={formHeaderStyle}>
-              <span style={formTitleStyle}>Confirm Booking Details</span>
+              <span style={formTitleStyle}>Confirm Priority Call Details</span>
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
@@ -232,12 +253,12 @@ const wrapperStyle: React.CSSProperties = {
 
 const cardStyle: React.CSSProperties = {
   background: 'rgba(255, 255, 255, 0.04)',
-  border: '1px solid rgba(16, 185, 129, 0.22)',
+  border: '1px solid rgba(16, 185, 129, 0.25)',
   borderRadius: '20px',
-  padding: '32px',
+  padding: '28px',
   display: 'flex',
   flexDirection: 'column',
-  gap: '20px',
+  gap: '18px',
   backdropFilter: 'blur(20px)',
   WebkitBackdropFilter: 'blur(20px)',
   boxShadow: '0 20px 60px rgba(0, 0, 0, 0.35)',
@@ -272,7 +293,7 @@ const titleStyle: React.CSSProperties = {
 
 const descStyle: React.CSSProperties = {
   fontSize: '13px',
-  color: 'rgba(235, 233, 225, 0.55)',
+  color: 'rgba(235, 233, 225, 0.6)',
   lineHeight: 1.6,
   margin: 0,
 };
@@ -286,14 +307,14 @@ const priceRowStyle: React.CSSProperties = {
 };
 
 const priceStyle: React.CSSProperties = {
-  fontSize: '32px',
+  fontSize: '30px',
   fontWeight: 800,
   color: '#10B981',
   letterSpacing: '-0.03em',
 };
 
 const priceLabelStyle: React.CSSProperties = {
-  fontSize: '13px',
+  fontSize: '12.5px',
   color: 'rgba(235, 233, 225, 0.45)',
   fontWeight: 500,
 };
@@ -302,10 +323,10 @@ const formStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   gap: '14px',
-  background: 'rgba(0, 0, 0, 0.25)',
+  background: 'rgba(0, 0, 0, 0.35)',
   padding: '20px',
   borderRadius: '14px',
-  border: '1px solid rgba(255, 255, 255, 0.08)',
+  border: '1px solid rgba(16, 185, 129, 0.2)',
 };
 
 const formHeaderStyle: React.CSSProperties = {
@@ -316,7 +337,7 @@ const formHeaderStyle: React.CSSProperties = {
 };
 
 const formTitleStyle: React.CSSProperties = {
-  fontSize: '14px',
+  fontSize: '13.5px',
   fontWeight: 700,
   color: '#EBE9E1',
   textTransform: 'uppercase',
@@ -347,7 +368,7 @@ const labelStyle: React.CSSProperties = {
 };
 
 const inputStyle: React.CSSProperties = {
-  padding: '10px 14px',
+  padding: '11px 14px',
   background: 'rgba(255, 255, 255, 0.05)',
   border: '1px solid rgba(255, 255, 255, 0.12)',
   borderRadius: '8px',
@@ -355,6 +376,7 @@ const inputStyle: React.CSSProperties = {
   fontSize: '13.5px',
   outline: 'none',
   boxSizing: 'border-box',
+  width: '100%',
 };
 
 const btnPrimaryStyle: React.CSSProperties = {
@@ -380,7 +402,7 @@ const btnSubmitStyle = (loading: boolean): React.CSSProperties => ({
   alignItems: 'center',
   justifyContent: 'center',
   gap: '8px',
-  padding: '12px 20px',
+  padding: '13px 20px',
   background: loading
     ? 'rgba(15, 130, 89, 0.4)'
     : 'linear-gradient(135deg, #0F8259 0%, #10B981 100%)',

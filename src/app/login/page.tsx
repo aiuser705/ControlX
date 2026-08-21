@@ -192,7 +192,7 @@ function LoginForm({ onLogin }: LoginFormProps) {
       setIsSuccess(true);
       setCatState('success');
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/account');
       }, 1500);
       return;
     }
@@ -221,7 +221,7 @@ function LoginForm({ onLogin }: LoginFormProps) {
     setIsSuccess(true);
     setCatState('success');
     setTimeout(() => {
-      router.push('/dashboard');
+      router.push('/account');
     }, 1500);
   };
 

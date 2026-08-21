@@ -148,7 +148,7 @@ function PaymentStatusContent() {
               </div>
             </div>
 
-            <Link href="/dashboard" style={btnPrimaryStyle}>
+            <Link href="/account" style={btnPrimaryStyle}>
               Return to Executive Dashboard &rarr;
             </Link>
           </div>
@@ -171,7 +171,7 @@ function PaymentStatusContent() {
             )}
 
             <div style={actionRowStyle}>
-              <Link href="/dashboard" style={btnPrimaryStyle}>
+              <Link href="/account" style={btnPrimaryStyle}>
                 Back to Dashboard
               </Link>
               <Link href="/#contact" style={btnSecondaryStyle}>
@@ -197,7 +197,7 @@ function PaymentStatusContent() {
               </div>
             )}
 
-            <Link href="/dashboard" style={btnPrimaryStyle}>
+            <Link href="/account" style={btnPrimaryStyle}>
               Back to Dashboard
             </Link>
           </div>
@@ -226,7 +226,7 @@ function PaymentStatusContent() {
               >
                 Refresh Status
               </button>
-              <Link href="/dashboard" style={btnSecondaryStyle}>
+              <Link href="/account" style={btnSecondaryStyle}>
                 Dashboard
               </Link>
             </div>
