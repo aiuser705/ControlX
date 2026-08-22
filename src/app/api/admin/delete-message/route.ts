@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     if (deleteErr) {
       console.error('[/api/admin/delete-message] DB error:', deleteErr.message);
       return NextResponse.json(
-        { error: `Failed to delete message: ${deleteErr.message}` },
+        { error: 'Failed to delete message. Please try again.' },
         { status: 500 }
       );
     }

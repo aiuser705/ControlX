@@ -1,5 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/server';
+import { requireAdminPage } from '@/lib/auth/require-admin';
 import InlineManageDropdown from '@/components/admin/InlineManageDropdown';
+
 
 interface BookingRecord {
   id: string;
@@ -21,7 +23,11 @@ interface BookingRecord {
 }
 
 export default async function AdminDashboardPage() {
+  // Independent auth + role check. Defense-in-depth: do not rely solely on AdminLayout.
+  await requireAdminPage();
+
   const supabase = createAdminClient();
+
 
   // Fetch all bookings sorted newest first
   const { data: rawBookings, error: fetchError } = await supabase

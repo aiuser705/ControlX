@@ -34,8 +34,10 @@ function getTransporter(): nodemailer.Transporter | null {
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 15000,
-    logger: true,
-    debug: true,
+    // logger and debug are disabled in production to prevent the Gmail App Password
+    // from appearing in Vercel log output via the SMTP AUTH command.
+    logger: process.env.NODE_ENV === 'development',
+    debug: process.env.NODE_ENV === 'development',
   });
 }
 

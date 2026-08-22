@@ -1,19 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { sendBookingConfirmation } from '@/lib/email';
 import { sendAdminNotifications } from '@/lib/notifications';
 
 /**
  * POST /api/payments/verify-payment
  *
- * Verifies a Cashfree payment order status directly against Cashfree Sandbox API,
+ * Verifies a Cashfree payment order status directly against Cashfree API,
  * updates the database state machine, and triggers confirmation email once.
+ *
+ * Security:
+ *  - Requires authenticated user session (401 if missing)
+ *  - Returns 404 uniformly for both not-found and not-owned bookings
+ *    (prevents order-ID enumeration oracle via 403 vs 404 distinction)
+ *  - Raw error details never returned to client
  */
 export async function POST(req: NextRequest) {
-  // ── 0. Diagnostic Logging for Environment Variables ───────────────────────
-  console.log('Using App ID:', process.env.CASHFREE_APP_ID?.slice(0, 8) + '...');
-
   try {
+    // ── 0. Authenticate the caller ────────────────────────────────────────────
+    const supabase = createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized.' }, { status: 401 });
+    }
+
+    // ── 1. Parse & validate orderId ───────────────────────────────────────────
     const body = await req.json().catch(() => ({}));
     const orderId = body.orderId || body.order_id;
 
@@ -37,10 +52,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const supabase = createAdminClient();
+    const adminSupabase = createAdminClient();
 
-    // ── 1. Check Database for Existing Booking Record ───────────────────────
-    const { data: booking, error: dbFetchError } = await supabase
+    // ── 2. Fetch booking and enforce ownership ─────────────────────────────────
+    const { data: booking, error: dbFetchError } = await adminSupabase
       .from('bookings')
       .select('*')
       .eq('cashfree_order_id', orderId)
@@ -50,8 +65,17 @@ export async function POST(req: NextRequest) {
       console.warn('[verify-payment] Database lookup note:', dbFetchError.message);
     }
 
-    // Fast-path: If already confirmed in DB, return immediately
-    if (booking && booking.status === 'confirmed') {
+    // Return 404 for both "not found" and "not owned by caller".
+    // Uniform 404 prevents an enumeration oracle (403 would reveal a valid ID exists).
+    if (!booking || booking.user_id !== user.id) {
+      return NextResponse.json(
+        { success: false, error: 'Booking not found.' },
+        { status: 404 }
+      );
+    }
+
+    // Fast-path: already confirmed in DB — return immediately
+    if (booking.status === 'confirmed') {
       console.log(`[verify-payment] Order ${orderId} is already CONFIRMED in database.`);
       return NextResponse.json({
         success: true,
@@ -69,9 +93,8 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // ── 2. Query Cashfree Orders API Directly ───────────────────────────────
+    // ── 3. Query Cashfree Orders API directly ──────────────────────────────────
     const fetchUrl = `${baseUrl}/orders/${encodeURIComponent(orderId)}`;
-    console.log(`Verifying order: ${orderId} at URL: ${baseUrl}`);
     console.log(`[verify-payment] Requesting: GET ${fetchUrl}`);
 
     const response = await fetch(fetchUrl, {
@@ -87,14 +110,9 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Cashfree Verification Failed:', response.status, errorText);
+      console.error('[verify-payment] Cashfree verification failed:', response.status, errorText);
       return NextResponse.json(
-        {
-          success: false,
-          status: 'failed',
-          error: 'Cashfree verification failed',
-          details: errorText,
-        },
+        { success: false, status: 'failed', error: 'Payment gateway verification failed.' },
         { status: response.status }
       );
     }
@@ -124,16 +142,14 @@ export async function POST(req: NextRequest) {
         break;
     }
 
-    // ── 3. Authoritative Database State Update & Email Dispatch ──────────────
-    if (booking?.id) {
-      // [1] — Log before DB update
-      console.log(`[1. Verify] Cashfree status is ${rawStatus}. Mapping to: ${mappedStatus}. Updating DB...`);
+    // ── 4. Authoritative DB state update & email dispatch ──────────────────────
+    if (booking.id) {
+      console.log(`[verify-payment] Cashfree status is ${rawStatus} → ${mappedStatus}. Updating DB...`);
 
       const updatePayload: Record<string, any> = { status: mappedStatus };
 
       if (mappedStatus === 'confirmed' && !booking.email_sent) {
-        // [3] — Log before email trigger
-        console.log('[3. Verify] Calling sendBookingConfirmation function...');
+        console.log('[verify-payment] Triggering confirmation email...');
         try {
           const emailSuccess = await sendBookingConfirmation({
             customerEmail: booking.customer_email,
@@ -162,7 +178,7 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const { error: updateError } = await supabase
+      const { error: updateError } = await adminSupabase
         .from('bookings')
         .update(updatePayload)
         .eq('id', booking.id);
@@ -173,15 +189,7 @@ export async function POST(req: NextRequest) {
         console.log(`[verify-payment] DB booking ${booking.id} updated to status=${mappedStatus}`);
       }
 
-      // [2] — Re-fetch the row to confirm what email_sent is after the update
-      const { data: updatedBooking } = await supabase
-        .from('bookings')
-        .select('email_sent')
-        .eq('id', booking.id)
-        .maybeSingle();
-      console.log(`[2. Verify] DB updated. email_sent flag is now: ${updatedBooking?.email_sent}`);
-
-      // --- ADD THIS BLOCK AFTER YOUR DATABASE SAVE ---
+      // Internal Edge Function relay (Telegram notification)
       if (mappedStatus === 'confirmed' && process.env.SUPABASE_EDGE_FUNCTION_URL) {
         try {
           await fetch(process.env.SUPABASE_EDGE_FUNCTION_URL, {
@@ -190,39 +198,34 @@ export async function POST(req: NextRequest) {
               'Content-Type': 'application/json',
               'X-Internal-Secret': process.env.INTERNAL_WEBHOOK_SECRET || '',
             },
-            body: JSON.stringify({ booking_id: booking.id }), // Ensure 'booking.id' matches your variable name
+            body: JSON.stringify({ booking_id: booking.id }),
           });
         } catch (notifyError) {
-          console.error("Failed to send Telegram notification:", notifyError);
-          // We do NOT throw an error here. The payment is still successful even if Telegram is down.
+          // Non-fatal: payment is confirmed even if relay is down
+          console.error('[verify-payment] Failed to call Edge Function relay:', notifyError);
         }
       }
-      // -----------------------------------------------
     }
 
     return NextResponse.json({
       success: true,
       status: mappedStatus,
-      raw_status: rawStatus,
       booking: {
-        id: booking?.id || cfOrder.order_id || orderId,
-        service_name: booking?.service_name || '1-Hour Executive Consultation',
-        amount: booking?.amount || cfOrder.order_amount || 5000,
-        currency: booking?.currency || cfOrder.order_currency || 'INR',
-        customer_name: booking?.customer_name || cfOrder.customer_details?.customer_name || 'Customer',
-        customer_email: booking?.customer_email || cfOrder.customer_details?.customer_email || '',
-        customer_phone: booking?.customer_phone || cfOrder.customer_details?.customer_phone || '',
+        id: booking.id || cfOrder.order_id || orderId,
+        service_name: booking.service_name || '1-Hour Executive Consultation',
+        amount: booking.amount || cfOrder.order_amount || 5000,
+        currency: booking.currency || cfOrder.order_currency || 'INR',
+        customer_name: booking.customer_name || cfOrder.customer_details?.customer_name || 'Customer',
+        customer_email: booking.customer_email || cfOrder.customer_details?.customer_email || '',
+        customer_phone: booking.customer_phone || cfOrder.customer_details?.customer_phone || '',
         cashfree_order_id: cfOrder.order_id || orderId,
       },
     });
   } catch (err: any) {
-    console.error('Internal Server Error in verify-payment:', err);
+    // Log full error server-side; never expose internals to client
+    console.error('[verify-payment] Unexpected internal error:', err);
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Internal Server Error',
-        details: err?.message || String(err),
-      },
+      { success: false, error: 'An unexpected error occurred. Please try again.' },
       { status: 500 }
     );
   }

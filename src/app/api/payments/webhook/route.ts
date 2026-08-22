@@ -73,9 +73,16 @@ export async function POST(req: NextRequest) {
       secretKey
     );
 
-    if (!isValidSignature && process.env.NODE_ENV !== 'development') {
-      console.error('[webhook] ❌ Invalid Cashfree webhook signature.');
-      return NextResponse.json({ error: 'Invalid webhook signature.' }, { status: 401 });
+    // Signature is always verified. The only escape hatch is ALLOW_UNSIGNED_WEBHOOKS=true,
+    // which must be explicitly set and is never present in production or staging.
+    const allowUnsigned = process.env.ALLOW_UNSIGNED_WEBHOOKS === 'true';
+    if (!isValidSignature) {
+      if (allowUnsigned) {
+        console.warn('[webhook] ⚠️ Signature INVALID — ALLOW_UNSIGNED_WEBHOOKS override active, proceeding');
+      } else {
+        console.error('[webhook] ❌ Invalid Cashfree webhook signature. Rejecting.');
+        return NextResponse.json({ error: 'Invalid webhook signature.' }, { status: 401 });
+      }
     }
 
     // ── 2. Parse Webhook Payload ────────────────────────────────────────────
@@ -204,6 +211,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (err: any) {
     console.error('[webhook] Unexpected error during webhook processing:', err);
-    return NextResponse.json({ error: err.message || 'Webhook processing failed.' }, { status: 500 });
+    return NextResponse.json({ error: 'Webhook processing failed.' }, { status: 500 });
   }
 }

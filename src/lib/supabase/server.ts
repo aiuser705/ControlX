@@ -29,12 +29,20 @@ export function createClient() {
 }
 
 /**
- * Service/Admin Supabase client bypassing RLS for backend-verified operations
+ * Service/Admin Supabase client bypassing RLS for backend-verified operations.
+ * FATAL if SUPABASE_SERVICE_ROLE_KEY is not set — never falls back to anon key,
+ * as that would silently subject admin operations to RLS policies.
  */
 export function createAdminClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error(
+      '[FATAL] createAdminClient: SUPABASE_SERVICE_ROLE_KEY is not configured. ' +
+      'Add it to your environment variables and redeploy.'
+    );
+  }
 
   return createSupabaseClient(supabaseUrl, supabaseKey, {
     auth: {
@@ -43,3 +51,4 @@ export function createAdminClient() {
     },
   });
 }
+

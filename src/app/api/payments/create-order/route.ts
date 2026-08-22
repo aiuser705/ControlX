@@ -267,7 +267,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error('[create-order] Unexpected error:', err);
     return NextResponse.json(
-      { success: false, error: err.message || 'Internal server error.' },
+      { success: false, error: 'An unexpected error occurred. Please try again.' },
       { status: 500 }
     );
   }
